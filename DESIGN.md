@@ -75,7 +75,11 @@ icon-in-rounded-square, shadcn defaults, four-col footer, "Get Started" copy.
 Kept by Daniel's order: Space Grotesk/Inter, ink/ice palette (Inter is a tell
 only as a solo system; locked under a distinct display face it stays).
 
-## Copy laws (extended 2026-07-15)
+## Copy laws
+MOVED: all copy voice law now lives in VOICE.md (single source of truth).
+Historical note below retained for context; VOICE.md wins on any conflict.
+
+### (superseded by VOICE.md)
 - CONCEPTUAL AGENCY BAN: abstractions never take verbs. "Sound arrives,"
   "the mind argues," "the room works on you," "your body knows" — all dead.
   The reader and the facilitator are the only agents. Sound may act ONLY as
