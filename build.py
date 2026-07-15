@@ -592,33 +592,36 @@ def build():
                     "@id": canonical_url
                 },
                 "about": [
-                    {"@type": "Thing", "name": "retail music strategy"},
-                    {"@type": "Thing", "name": "in-store customer behavior"},
-                    {"@type": "Thing", "name": "engineered retail audio"}
+                    {"@type": "Thing", "name": "sound sessions"},
+                    {"@type": "Thing", "name": "sound baths"},
+                    {"@type": "Thing", "name": "rest and nervous system down-regulation"}
                 ]
             }
         else:
             schema = {
                 "@context": "https://schema.org",
-                "@type": "Organization",
+                "@type": "LocalBusiness",
                 "name": "Sound Sessions",
                 "url": SITE_URL,
-                "description": "Facilitated sound sessions in Denver. Engineered sound experiences with sub-bass, studio-grade production, and formal ceremony.",
-                "foundingDate": "2026",
-                "founder": {
-                    "@type": "Person",
-                    "name": "Daniel Fox"
+                "image": f"{SITE_URL}/img/og-default.png",
+                "description": "Facilitated sound sessions in Denver. Engineered sound experiences with sub-bass, studio-grade production, and formal ceremony — built around things worth putting down.",
+                "areaServed": {
+                    "@type": "AdministrativeArea",
+                    "name": "Denver metro and the Colorado Front Range"
                 },
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Denver",
+                    "addressRegion": "CO",
+                    "addressCountry": "US"
+                },
+                "priceRange": "$$",
                 "knowsAbout": [
-                    "retail atmospherics",
-                    "music psychology",
-                    "in-store customer behavior",
-                    "retail analytics",
-                    "engineered retail audio",
-                    "behavioral retail variables"
-                ],
-                "sameAs": [
-                    ""
+                    "sound sessions",
+                    "sound baths",
+                    "engineered sub-bass sound experiences",
+                    "group facilitation",
+                    "rest and nervous system down-regulation"
                 ]
             }
 
