@@ -58,3 +58,29 @@ BLOG: listing grid, posts via content.yaml pipeline (unchanged).
 ## Build order
 P1 tokens/layout rewrite → P2 imagery + waveform + OG → P3 schema + FAQ/About →
 P4 pretty URLs + redirects + Blog rename. Email capture: placeholder block, provider TBD.
+
+## AI design-tell audit (researched 2026-07-15)
+Root cause per Anthropic's frontend-aesthetics cookbook: distributional
+convergence — unprompted models emit the statistical average ("AI slop").
+Tells found in OUR v1 → fixes applied:
+1. Three identical cards in a row (steps grid) → asymmetric staggered
+   sequence, oversized thin numerals, hairline rules, no card boxes
+2. Reflexive glassmorphism (header backdrop-blur) → solid ink + hairline
+3. Uniform border-radius everywhere → radius 0, sharp editorial edges
+4. Copy-paste motion (fade-up on everything) → motion in the hero only
+5. Timid weight contrast → weight extremes (display 300 vs 700), 3x+ size jumps
+6. Zero asymmetry / flat section rhythm → staggered offsets, varied padding
+Already avoided: purple-indigo gradient, centered hero, emoji bullets,
+icon-in-rounded-square, shadcn defaults, four-col footer, "Get Started" copy.
+Kept by Daniel's order: Space Grotesk/Inter, ink/ice palette (Inter is a tell
+only as a solo system; locked under a distinct display face it stays).
+
+## Copy laws (extended 2026-07-15)
+- CONCEPTUAL AGENCY BAN: abstractions never take verbs. "Sound arrives,"
+  "the mind argues," "the room works on you," "your body knows" — all dead.
+  The reader and the facilitator are the only agents. Sound may act ONLY as
+  literal physics (pressure in a chest). "Your body / your mind" as characters
+  is the deepest wellness-copy tell; people feel, drop, come back, put down.
+- No em dashes in site copy (writing-voice law, applies here too).
+- No apology, no defensive disclosure: "not therapy" never appears in site
+  copy. Waiver + resource card are door objects, not marketing.
