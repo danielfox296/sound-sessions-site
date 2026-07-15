@@ -1,4 +1,4 @@
-name: Deploy entuned.co
+name: Deploy sound sessions site
 
 on:
   push:
@@ -15,34 +15,25 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout brand-site
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # --- Install blog renderer dependencies ---
       - name: Install Python dependencies
         run: pip install jinja2 markdown Pillow pyyaml
 
-      # --- Build the brand site from _src/ modules ---
       - name: Build site
         run: python3 build.py
 
-      # --- Assemble the full site ---
       - name: Stage site
         run: |
           mkdir -p _site
-          # Copy built HTML files and static assets
-          cp -r *.html styles.css CNAME _site/ 2>/dev/null || true
-          cp -r sitemap.xml rss.xml robots.txt llms.txt llms-full.txt _site/ 2>/dev/null || true
+          cp -r *.html styles.css _site/ 2>/dev/null || true
+          cp -r sitemap.xml rss.xml llms.txt _site/ 2>/dev/null || true
           cp -r img _site/img 2>/dev/null || true
-          cp -r styles _site/styles 2>/dev/null || true
           cp -r audio _site/audio 2>/dev/null || true
-          cp -r data _site/data 2>/dev/null || true
-          cp -r downloads _site/downloads 2>/dev/null || true
-          cp -r blog _site/blog 2>/dev/null || true
-          cp -r raise _site/raise 2>/dev/null || true
-          cp -r pricing _site/pricing 2>/dev/null || true
-          cp -r pilot _site/pilot 2>/dev/null || true
           cp -r js _site/js 2>/dev/null || true
+          cp -r sessions _site/sessions 2>/dev/null || true
+          cp -r blog _site/blog 2>/dev/null || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
