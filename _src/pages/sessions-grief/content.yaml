@@ -1,0 +1,24 @@
+title: "Grief"
+slug: "grief"
+eyebrow: "A SOUND SESSION"
+dek: "For people carrying a death. Denver. Being built slowly."
+date: "2026-07-16"
+last_updated: "2026-07-16"
+author:
+  name: "Sound Sessions"
+  role: "Denver"
+meta_description: "A facilitated sound session in Denver for people carrying a death. A smaller room, fewer seats, more time held at the quiet end."
+llms_description: "A facilitated sound session in Denver for people carrying a death. A smaller room, fewer seats, more time held at the quiet end."
+tags: [sessions, grief, denver]
+sections:
+  - type: prose
+    body: |
+      A session for people carrying a death. A smaller room, fewer seats, and
+      more time held at the quiet end of the night. You will not be asked to
+      share, to speak, or to be anywhere but on the floor.
+
+  - type: prose
+    body: |
+      This one is being built slowly, with the most care of anything on this
+      site. [Write to us](../../contact/) and check the box, and you will hear
+      when it is ready.

@@ -1,0 +1,24 @@
+title: "Singles"
+slug: "singles"
+eyebrow: "A SOCIAL NIGHT"
+dek: "Sound at the center. Labeled exactly what it is."
+date: "2026-07-16"
+last_updated: "2026-07-16"
+author:
+  name: "Sound Sessions"
+  role: "Denver"
+meta_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm room than a loud one."
+llms_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm room than a loud one."
+tags: [sessions, denver, social]
+sections:
+  - type: prose
+    body: |
+      A social night with sound at the center, for single people who would
+      rather meet someone in a calm room than a loud one. You hear each other
+      think before you hear each other talk. It runs on its own, separate from
+      every other session, and it is labeled exactly what it is.
+
+  - type: prose
+    body: |
+      First date being set, in both senses. [Write to us](../../contact/) and
+      check the box to hear when tickets go up.

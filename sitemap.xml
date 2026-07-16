@@ -16,12 +16,62 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/corporate/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://REPLACE-WITH-DOMAIN.example/faq/index.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/couples/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/grief/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://REPLACE-WITH-DOMAIN.example/sessions/healing-from-breakups/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/laid-off/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/new-to-denver/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/quiet-new-years/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/singles/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/sleep/index.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://REPLACE-WITH-DOMAIN.example/sessions/sunday-downshift/index.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

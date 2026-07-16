@@ -1,0 +1,25 @@
+title: "Laid Off"
+slug: "laid-off"
+eyebrow: "A SOUND SESSION"
+dek: "For people leaving a company, and the teams they leave behind."
+date: "2026-07-16"
+last_updated: "2026-07-16"
+author:
+  name: "Sound Sessions"
+  role: "Denver"
+meta_description: "A sound session for people leaving a company and the teams they leave behind. Usually booked by the employer as part of a decent goodbye."
+llms_description: "A sound session for people leaving a company and the teams they leave behind. Usually booked by the employer as part of a decent goodbye."
+tags: [sessions, denver, corporate]
+sections:
+  - type: prose
+    body: |
+      A session for people leaving a company, and for the teams they leave
+      behind. A layoff lands in the body like any other ending, and most people
+      go straight from the news to updating a resume without an hour in between.
+      This is the hour in between.
+
+  - type: prose
+    body: |
+      Usually an employer books this as part of a decent goodbye. If that could
+      be your company, see [Corporate](../../corporate/). Occasionally we run it
+      open; [write to us](../../contact/) and check the box to hear when.

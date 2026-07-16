@@ -1,0 +1,24 @@
+title: "New to Denver"
+slug: "new-to-denver"
+eyebrow: "A SOUND SESSION"
+dek: "For people who just moved here. Social on purpose."
+date: "2026-07-16"
+last_updated: "2026-07-16"
+author:
+  name: "Sound Sessions"
+  role: "Denver"
+meta_description: "A sound session for people who just moved to Denver. Seventy-five minutes of engineered sound, then time to meet others who came for the same reason."
+llms_description: "A sound session for people who just moved to Denver. Seventy-five minutes of engineered sound, then time to meet others who came for the same reason."
+tags: [sessions, denver]
+sections:
+  - type: prose
+    body: |
+      A session for people who just moved here and know three people, two of them
+      coworkers. Sound first, seventy-five minutes of it, and time after to meet
+      the others who came for the same reason. This night is social on purpose
+      and labeled that way.
+
+  - type: prose
+    body: |
+      First date being set. [Write to us](../../contact/) and check the box, and
+      you will hear before the poster does.

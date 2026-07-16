@@ -42,7 +42,8 @@ from _src.lib.reading_time import calculate_reading_time
 # Constants
 # ---------------------------------------------------------------------------
 
-VALID_EYEBROWS = {'A SOUND SESSION', 'JOURNAL', 'FIELD NOTES', 'SOUND', 'PRACTICE'}
+VALID_EYEBROWS = {'A SOUND SESSION', 'A SOCIAL NIGHT', 'A RECORDED SESSION',
+                  'JOURNAL', 'FIELD NOTES', 'SOUND', 'PRACTICE'}
 
 KNOWN_BLOCK_TYPES = {
     'prose', 'subhead', 'pullquote', 'stat_callout', 'data_viz',
