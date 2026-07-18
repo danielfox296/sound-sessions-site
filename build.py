@@ -457,7 +457,7 @@ def build():
             description = post_data.get('meta_description',
                                         config.get('meta_description', ''))
             output      = output_check
-            nav_prefix  = '../'
+            nav_prefix  = '../' * output_check.count('/')
             css_path    = nav_prefix
             content     = content_html
 
