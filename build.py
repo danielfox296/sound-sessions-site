@@ -1204,7 +1204,7 @@ def build_event_pages(base, header, footer, cal_feed, now):
         canonical_url = external_events.event_permalink_url(row, SITE_URL)
 
         name = row['name']
-        title = f'{name} — {row["city"]} | Firstwater'
+        title = f'{html_mod.escape(name)} — {row["city"]} | Firstwater'
         description = external_events.factual_description(row)
         meta_desc = (f'<meta name="description" '
                      f'content="{html_mod.escape(description, quote=True)}">')
