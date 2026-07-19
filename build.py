@@ -1176,6 +1176,13 @@ def build_event_pages(base, header, footer, cal_feed, now):
     (loc, lastmod) for an UPCOMING page only.
     """
     print('\nGenerating calendar event pages...')
+    # Clear stale event pages from a previous build first: an event that drops
+    # out of the feed (past its date, renamed, un-approved, or fabricated seed
+    # data replaced by a real pull) must not leave an orphaned page behind to
+    # ship to production. The directory is regenerated to reflect ONLY the
+    # current feed on every build.
+    import shutil
+    shutil.rmtree(os.path.join(REPO, 'calendar', 'event'), ignore_errors=True)
     rows = external_events.approved_event_rows(cal_feed, now=now)
     if not rows:
         print('  (none)')

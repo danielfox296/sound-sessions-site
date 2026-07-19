@@ -63,7 +63,7 @@ from urllib.parse import quote_plus
 from _src.lib import sessions_feed
 from _src.lib.sessions_feed import DENVER, parse_iso
 
-DEFAULT_FEED_URL = 'https://ss-service-production.up.railway.app/feeds/calendar.json'
+DEFAULT_FEED_URL = 'https://events.thefirstwater.co/feeds/calendar.json'
 CACHE_REL_PATH = os.path.join('data', 'external-events.json')
 FETCH_TIMEOUT_S = 10
 
