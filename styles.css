@@ -34,12 +34,19 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
 .eyebrow { font: 600 0.75rem var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 1.2rem; }
 
+/* ---- cymatics ground (signature element) ----
+   Fixed canvas behind everything; scroll-driven Chladni nodal lines.
+   Sections sit at z-index 1: light sections are opaque and cover it,
+   dark sections are transparent and let it read through. */
+#cymaticsCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+.cymatics-band { height: 55vh; }
+
 /* ---- sections: contrast rhythm ---- */
-.section { padding: 7rem 0; }
+.section { padding: 7rem 0; position: relative; z-index: 1; }
 .section--light { background: var(--paper); color: var(--ink); }
 .section--light .eyebrow { color: rgba(10,11,13,0.55); }
 .section--light a { color: var(--accent); }
-.section--dark { background: var(--ink); color: var(--paper); }
+.section--dark { background: transparent; color: var(--paper); }
 .section--panel { background: var(--panel); color: var(--paper); }
 .section h2 { font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1.6rem; }
 .section p { max-width: 42rem; }
@@ -66,11 +73,22 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .hero-section { min-height: 82vh; display: flex; align-items: center; position: relative; overflow: hidden; }
 .hero-section h1 { font-size: clamp(3.5rem, 9vw, 7.5rem); font-weight: 300; letter-spacing: -0.01em; max-width: 15ch; }
 .hero-sub { color: var(--gray); font-size: 1.15rem; max-width: 38rem; margin: 1.8rem 0 2.6rem; }
-.hero-wave { position: absolute; left: 0; right: 0; bottom: 8%; opacity: 0.45; pointer-events: none; }
-/* Waveform as section divider (DESIGN.md signature element; opacity <= .5) */
-.wave-divider { opacity: 0.3; pointer-events: none; margin: -3.5rem 0 3.5rem; }
-.wave-divider img { display: block; width: 100%; height: 44px; }
 .hero-date { color: var(--accent); font: 600 0.85rem var(--font-body); letter-spacing: 0.12em; text-transform: uppercase; }
+/* Full-bleed photo behind the hero; directional scrim keeps the left column readable */
+.hero-media { position: absolute; inset: 0; z-index: 0; }
+.hero-media img { width: 100%; height: 100%; object-fit: cover; }
+.hero-media::after { content: ""; position: absolute; inset: 0; background:
+  linear-gradient(100deg, rgba(10,11,13,0.96) 0%, rgba(10,11,13,0.82) 38%, rgba(10,11,13,0.42) 66%, rgba(10,11,13,0.18) 100%),
+  linear-gradient(0deg, rgba(10,11,13,0.85) 0%, rgba(10,11,13,0) 34%); }
+.hero-section .container { position: relative; z-index: 2; }
+.hero-section .hero-sub { color: rgba(245,247,250,0.82); }
+/* Interior page hero: same anatomy, lower ceiling */
+.page-hero { min-height: 56vh; padding: 6rem 0 4rem; }
+.page-hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 300; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-media img { animation: heroDrift 16s ease-out both; }
+  @keyframes heroDrift { from { transform: scale(1.055); } to { transform: scale(1); } }
+}
 
 /* ---- buttons ---- */
 .btn { display: inline-block; font: 600 0.95rem var(--font-body); text-decoration: none; padding: 0.95rem 2rem; transition: filter .2s, transform .15s; }
@@ -80,14 +98,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 .btn-ghost { border: 1px solid var(--line); color: var(--paper); }
 .section--light .btn-ghost { color: var(--ink); border-color: rgba(10,11,13,0.25); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-/* ---- photo band ---- */
-.photo-band { padding: 0; background: var(--ink); }
-.photo-band .band-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.photo-band img { width: 100%; height: 340px; object-fit: cover; filter: grayscale(1) contrast(1.05); }
-.photo-band figure { position: relative; margin: 0; }
-.photo-band figure::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(98,182,232,0.18), rgba(10,11,13,0.55)); mix-blend-mode: color; pointer-events: none; }
-@media (max-width: 760px) { .photo-band .band-grid { grid-template-columns: 1fr; } .photo-band img { height: 240px; } }
 
 /* ---- steps ---- */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 3rem; }
@@ -116,7 +126,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .logistics dd { margin: 0.2rem 0 0; }
 
 /* ---- footer ---- */
-.site-footer { border-top: 1px solid var(--line); padding: 4rem 0; background: var(--ink); }
+.site-footer { border-top: 1px solid var(--line); padding: 4rem 0; background: transparent; position: relative; z-index: 1; }
 .footer-inner { display: flex; flex-direction: column; gap: 1.2rem; }
 .footer-line { font-family: var(--font-display); font-size: 1.15rem; }
 .footer-links { list-style: none; display: flex; gap: 1.6rem; flex-wrap: wrap; }
@@ -141,7 +151,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 @media (max-width: 760px) { .seq-item, .seq-item:nth-child(2), .seq-item:nth-child(3) { margin-left: 0; grid-template-columns: 70px 1fr; gap: 1.2rem; } .seq-n { font-size: 2.6rem; } }
 
 /* ---- blog (renderer classes) ---- */
-.blog-article { max-width: 44rem; margin: 0 auto; padding: 5rem 24px; }
+.blog-article { max-width: 44rem; margin: 0 auto; padding: 5rem 24px; position: relative; z-index: 1; }
 .blog-article__header { margin-bottom: 3rem; }
 .blog-eyebrow { font: 600 0.75rem var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
 .blog-headline { font-size: clamp(2.2rem, 5vw, 3.6rem); margin: 1rem 0 1.2rem; }

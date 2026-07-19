@@ -21,15 +21,24 @@ RULE: adjacent elements never use adjacent scale steps — contrast is the aesth
 dark hero → light section → dark photo band → light FAQ → dark footer.
 Alternation is mandatory; two same-ground sections never touch.
 
-## Signature element
-The rendered waveform of the 60-minute arc: thin ice-blue line (img/waveform.svg),
-hero underlay + section divider. It is the product's fingerprint; keep it subtle (opacity ≤ .5).
+## Signature element (v2, 2026-07-19)
+Cymatics: scroll-driven Chladni nodal-line canvas (ported from entuned.co), fixed
+behind all content, drawn in ice/paper hairlines on the ink ground. Modes climb as
+you scroll; visible through dark/transparent sections (hero edges, home interlude
+band, footer, article margins). Line alphas ≤ .16 — it is a ground, not a graphic.
+Replaced v1 waveform.svg underlay/divider and the generated-art photo band (removed).
+(og.py still draws its own waveform on share cards; unrelated to the site element.)
 
 ## Photography
-Interim: free-license stock, duotone-processed to ink/ice (scripts/duotone.py).
+Interim: Unsplash stock, duotone-processed to ink/ice (scripts/duotone.py).
+Source photo IDs recorded in img/hero/SOURCES.md.
+Every page carries a hero image: full-bleed .hero-media + directional ink scrim
+(readability left, image reads right); session pages carry an in-article hero
+figure via content.yaml hero: block. Hero background imgs are decorative
+(alt="" aria-hidden); in-article figures carry real alt text.
 Art direction: dark rooms, mats on floors, speaker/gong macro, single practical light.
 Post-pilot shot list replaces stock: wide room in session, gong detail, hands on mats, the light.
-Conventions: img/hero/*.jpg 1600px, ≤500KB, WebP preferred, alt text mandatory.
+Conventions: img/hero/*.jpg 1600px, ≤500KB, WebP preferred.
 
 ## IA + naming (down the middle)
 Nav: Sessions · About · FAQ · Blog · [Get tickets]

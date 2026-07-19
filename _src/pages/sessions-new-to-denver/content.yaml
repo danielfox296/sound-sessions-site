@@ -2,6 +2,9 @@ title: "New to Denver"
 slug: "new-to-denver"
 eyebrow: "A SOUND SESSION"
 dek: "For people who just moved here. Social on purpose."
+hero:
+  src: "../../img/hero/session-new-to-denver.jpg"
+  alt: "The Denver skyline at night under heavy cloud"
 date: "2026-07-16"
 last_updated: "2026-07-16"
 author:
