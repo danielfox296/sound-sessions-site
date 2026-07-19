@@ -53,6 +53,9 @@ PAGES    = os.path.join(SRC, 'pages')
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
 from _src.lib import sessions_feed
+# External-events feed (Front Range /calendar/): same graceful-fallback seam
+# as sessions_feed. Stdlib-only, safe to import unconditionally.
+from _src.lib import external_events
 SITE_URL = 'https://thefirstwater.co'
 
 # Sitewide description used in LocalBusiness + WebSite JSON-LD.
@@ -384,6 +387,13 @@ def build():
     feed = sessions_feed.load_feed(REPO)
     print()
 
+    # Load the external-events (calendar) feed, same never-break-the-build
+    # discipline: /feeds/calendar.json > committed data/external-events.json >
+    # empty. Only /calendar/ consumes it; every other page is unaffected.
+    print('Loading calendar feed...')
+    cal_feed = external_events.load_feed(REPO)
+    print()
+
     # Find all page directories (supports nested: pages/blog-posts/slug/)
     page_dirs = []
     for root, dirs, files in os.walk(PAGES):
@@ -542,6 +552,7 @@ def build():
         # state) both branches are no-ops and output is byte-identical.
         # ---------------------------------------------------------------
         page_sessions = []
+        _cal_rows = None  # set for the calendar page; drives its ItemList JSON-LD
         _sess_match = re.fullmatch(r'sessions/([^/]+)/index\.html', output)
         if _sess_match and use_new_renderer:
             page_sessions = sessions_feed.sessions_for_slug(feed, _sess_match.group(1))
@@ -583,6 +594,24 @@ def build():
                     lambda m: m.group(1) + _hero_label + m.group(2),
                     content, count=1, flags=re.DOTALL,
                 )
+
+        # ---------------------------------------------------------------
+        # CALENDAR PAGE INJECTION (/calendar/)
+        # The section file carries the static scaffold (hero, digest signup,
+        # jump nav, submission line) plus two markers. Fill them from the feed:
+        # the this-weekend strip + four area sections, and the build-date stamp.
+        # One shared `now` keeps the weekend window, past-event drop, and the
+        # stamp consistent. Rows are reused below for the ItemList JSON-LD.
+        # ---------------------------------------------------------------
+        if output == 'calendar/index.html':
+            _cal_now = external_events.current_now()
+            _cal_rows = external_events.build_rows(cal_feed, feed, now=_cal_now)
+            _cal_body = external_events.render_calendar_body(
+                _cal_rows, nav_prefix, now=_cal_now)
+            content = content.replace('<!-- CALENDAR_BODY -->', _cal_body)
+            content = content.replace(
+                '<!-- CALENDAR_LAST_UPDATED -->',
+                html_mod.escape(external_events.fmt_stamp_date(_cal_now)))
 
         # ---------------------------------------------------------------
         # SHARED LAYOUT ASSEMBLY (both old and new pipelines converge)
@@ -917,6 +946,15 @@ def build():
                     description=description, image=og_image,
                 )
                 schema_json += f'\n  <script type="application/ld+json">\n{json.dumps(_ev, indent=2)}\n  </script>'
+
+        # ItemList of per-row Events (WP-calendar) — one ItemList wrapping an
+        # Event per rendered /calendar/ row (external approved + Firstwater).
+        # Only accurate fields are emitted; missing data is never padded. None
+        # when the calendar is empty (no script tag written).
+        if output == 'calendar/index.html' and _cal_rows:
+            _il = external_events.calendar_itemlist(_cal_rows, canonical_url, SITE_URL)
+            if _il:
+                schema_json += f'\n  <script type="application/ld+json">\n{json.dumps(_il, indent=2)}\n  </script>'
 
         # Substitute into base layout
         html = base
