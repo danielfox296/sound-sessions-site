@@ -93,12 +93,15 @@ _SUBURB_TO_CITY = {
     'centennial': 'Denver', 'englewood': 'Denver', 'littleton': 'Denver',
     'wheat ridge': 'Denver', 'golden': 'Denver', 'thornton': 'Denver',
     'westminster': 'Denver', 'commerce city': 'Denver', 'broomfield': 'Denver',
+    'highlands ranch': 'Denver', 'parker': 'Denver', 'castle rock': 'Denver',
+    'lone tree': 'Denver', 'brighton': 'Denver', 'northglenn': 'Denver',
     'longmont': 'Boulder', 'louisville': 'Boulder', 'lafayette': 'Boulder',
-    'superior': 'Boulder', 'nederland': 'Boulder',
+    'superior': 'Boulder', 'nederland': 'Boulder', 'erie': 'Boulder',
     'loveland': 'Fort Collins', 'windsor': 'Fort Collins',
     'greeley': 'Fort Collins', 'wellington': 'Fort Collins',
+    'berthoud': 'Fort Collins', 'timnath': 'Fort Collins',
     'manitou springs': 'Colorado Springs', 'monument': 'Colorado Springs',
-    'fountain': 'Colorado Springs',
+    'fountain': 'Colorado Springs', 'woodland park': 'Colorado Springs',
 }
 
 # Statuses that render. Anything else (candidate/rejected/unknown) is dropped.
