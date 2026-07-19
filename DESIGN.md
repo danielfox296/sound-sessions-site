@@ -12,7 +12,7 @@ Ratified calls: ICE BLUE accent · DUOTONE stock interim · email = placeholder 
 --line: rgba(152,161,171,0.18)
 
 ## Type
-Display: Space Grotesk 500/700 — hero clamp(3.5rem, 9vw, 7.5rem), section H2 clamp(2rem,4vw,3.2rem)
+Display: Space Grotesk 500/700 — hero clamp(2.6rem, 5.5vw, 4.2rem) single-line H1, no forced breaks (downsized per Daniel 2026-07-19; was 9vw/7.5rem), section H2 clamp(2rem,4vw,3.2rem)
 Body: Inter 400/600 — 1.06rem / 1.7
 Eyebrow: Inter 600, 0.75rem, letter-spacing 0.16em, uppercase, gray
 RULE: adjacent elements never use adjacent scale steps — contrast is the aesthetic.
@@ -37,6 +37,10 @@ Every page carries a hero image: full-bleed .hero-media + directional ink scrim
 figure via content.yaml hero: block. Hero background imgs are decorative
 (alt="" aria-hidden); in-article figures carry real alt text.
 Art direction: dark rooms, mats on floors, speaker/gong macro, single practical light.
+WARMTH RULE (Daniel, 2026-07-19): imagery must read warm, beautiful, held — the venue
+reality is warm yoga studios. Never institutional, abandoned, or eerie: no empty metal
+beds, no bare rooms with harsh glare, no vacant seating. Soft fabric, plants, wood,
+candles, human presence survive the duotone; emptiness turns sinister under it.
 Post-pilot shot list replaces stock: wide room in session, gong detail, hands on mats, the light.
 Conventions: img/hero/*.jpg 1600px, ≤500KB, WebP preferred.
 

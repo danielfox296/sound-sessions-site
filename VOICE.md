@@ -63,7 +63,6 @@ he departs from it whenever it serves.
 - "You feel it in your chest before you hear it."
 - "If you'd rather stay on the floor, that's what the floor is for."
 - "Say so and your ticket comes back."
-- "Doors close at start time and stay closed."
 - Entity block (Daniel's own words, ratified 2026-07-18; supersedes the
   site-plan draft): "The sessions that we hold at Firstwater in Denver gather
   people from all walks of life and states into a place of gratitude,
@@ -76,6 +75,15 @@ he departs from it whenever it serves.
   never explain the evening; never call the sound a doorway; never treat
   "the room" as an object. "Healing sound" is Daniel's own usage here and is
   canonical inside this block only.
+
+## Banned lines (Daniel, 2026-07-19 — permanent, no variants)
+- "Doors close at start time and stay closed." Removed from canon by Daniel.
+  Door and lateness policy never appears in copy in any form; the step-out
+  reassurance ("the door is beside you and nobody will make it a moment")
+  stands on its own.
+- The "How loud does it get?" FAQ answer ("strong in the chest and easy on
+  the ear...") — rejected by Daniel. Do not answer volume questions with
+  reassurance mechanics; if volume copy is ever needed, Daniel writes it.
 
 ## Structure for selling pages
 Direct-response architecture under ceremony diction: hook in the reader's

@@ -87,6 +87,18 @@ def page_url(output):
         return f'{SITE_URL}/{output[:-len("index.html")]}'
     return f'{SITE_URL}/{output}'
 
+
+def _clean_leaf(title):
+    """Clean breadcrumb/display leaf name from a full <title>: drop the brand
+    suffix and any descriptor tail after a colon or pipe. 'FAQ: What Happens
+    ... | Firstwater' -> 'FAQ'."""
+    t = title
+    for suf in (' | Firstwater', ' — Firstwater'):
+        if t.endswith(suf):
+            t = t[:-len(suf)]
+            break
+    return t.split(':')[0].split(' | ')[0].strip()
+
 # ---------------------------------------------------------------------------
 # New blog renderer (Jinja2 + YAML pipeline)
 # ---------------------------------------------------------------------------
@@ -468,8 +480,12 @@ def build():
                 raise SystemExit(1)
 
             # Pull metadata from the YAML frontmatter.
-            # seo_title (if set) drives the <title> tag; title drives the H1.
-            _raw_title = post_data.get('seo_title') or post_data.get('title', config.get('title', 'Firstwater'))
+            # config.seo_title (STRUCTURE-owned) wins so session <title>s follow
+            # the SEO pattern from config.json without touching content.yaml
+            # (which the content pipeline owns and which drives the H1). Falls
+            # back to the post's own seo_title/title.
+            _raw_title = (config.get('seo_title') or post_data.get('seo_title')
+                          or post_data.get('title', config.get('title', 'Firstwater')))
             # Strip any existing suffix (legacy or canonical) before re-appending
             for legacy in (' | Firstwater', ' — Firstwater', ' | Sound Sessions', ' — Sound Sessions'):
                 if _raw_title.endswith(legacy):
@@ -527,11 +543,26 @@ def build():
         # ---------------------------------------------------------------
         page_sessions = []
         _sess_match = re.fullmatch(r'sessions/([^/]+)/index\.html', output)
-        if _sess_match and output != 'sessions/index.html':
+        if _sess_match and use_new_renderer:
             page_sessions = sessions_feed.sessions_for_slug(feed, _sess_match.group(1))
+
+            # Session pages reuse the blog article template but are selling
+            # pages, not posts: strip the byline/read-time and reading-progress
+            # bar, and put a plain status line where the byline was — the real
+            # date/room when the feed has a live session, else the config
+            # fallback ('Denver · first date being set'). Blog posts never pass
+            # through here and keep both.
+            _status = sessions_feed.status_line(
+                page_sessions,
+                fallback=config.get('status_line', 'Denver · first date being set'),
+            )
+            content = sessions_feed.strip_blog_chrome(content, _status)
+
             if page_sessions:
                 # Depth-correct asset prefix (nav_prefix is '../' for all
                 # new-renderer pages, which is wrong at sessions/<slug>/ depth).
+                # render_sessions_block emits the .logistics card + one-click
+                # ticket button + js/sessions.js; Event JSON-LD is emitted below.
                 _asset_prefix = '../' * output.count('/')
                 _block = sessions_feed.render_sessions_block(page_sessions, _asset_prefix)
                 if '</article>' in content:
@@ -603,6 +634,14 @@ def build():
             if og_title.endswith(suffix):
                 og_title = og_title[:-len(suffix)]
                 break
+
+        # Clean leaf name for BreadcrumbList (no brand suffix, no descriptor
+        # tail). Session/blog pages use their content-owned display title;
+        # root pages use an explicit config `breadcrumb`, else a derived name.
+        if use_new_renderer:
+            leaf_name = post_data.get('title') or _clean_leaf(title)
+        else:
+            leaf_name = config.get('breadcrumb') or _clean_leaf(title)
 
         # OG type
         og_type = 'article' if is_blog else 'website'
@@ -693,7 +732,7 @@ def build():
                 "about": [
                     {"@type": "Thing", "name": "sound sessions"},
                     {"@type": "Thing", "name": "sound baths"},
-                    {"@type": "Thing", "name": "rest and nervous system down-regulation"}
+                    {"@type": "Thing", "name": "deep rest"}
                 ]
             }
         else:
@@ -718,9 +757,11 @@ def build():
                 "knowsAbout": [
                     "sound sessions",
                     "sound baths",
+                    "sound healing",
                     "engineered sub-bass sound experiences",
                     "group facilitation",
-                    "rest and nervous system down-regulation"
+                    "group sound sessions",
+                    "deep rest"
                 ]
             }
             if SAME_AS:
@@ -835,12 +876,12 @@ def build():
 
             if is_blog:
                 crumbs.append({"@type": "ListItem", "position": 2, "name": "Blog", "item": SITE_URL + "/blog/"})
-                crumbs.append({"@type": "ListItem", "position": 3, "name": og_title})
+                crumbs.append({"@type": "ListItem", "position": 3, "name": leaf_name})
             elif output.startswith('sessions/') and output != 'sessions/index.html':
                 crumbs.append({"@type": "ListItem", "position": 2, "name": "Sessions", "item": SITE_URL + "/sessions/"})
-                crumbs.append({"@type": "ListItem", "position": 3, "name": og_title})
+                crumbs.append({"@type": "ListItem", "position": 3, "name": leaf_name})
             else:
-                crumbs.append({"@type": "ListItem", "position": 2, "name": og_title})
+                crumbs.append({"@type": "ListItem", "position": 2, "name": leaf_name})
 
             breadcrumb_schema = {
                 "@context": "https://schema.org",
@@ -848,6 +889,21 @@ def build():
                 "itemListElement": crumbs
             }
             schema_json += f'\n  <script type="application/ld+json">\n{json.dumps(breadcrumb_schema, indent=2)}\n  </script>'
+
+        # Service schema — corporate page only. Metadata layer, so planner
+        # language is fine here (Appendix E finding 3).
+        if output == 'corporate/index.html':
+            service_schema = {
+                "@context": "https://schema.org",
+                "@type": "Service",
+                "name": "Corporate & Group Sound Sessions",
+                "serviceType": "Corporate wellness event",
+                "provider": {"@type": "LocalBusiness", "name": "Firstwater", "url": "https://thefirstwater.co"},
+                "areaServed": {"@type": "AdministrativeArea", "name": "Denver metro and the Colorado Front Range"},
+                "offers": {"@type": "Offer", "price": "450", "priceCurrency": "USD"},
+                "url": "https://thefirstwater.co/corporate/"
+            }
+            schema_json += f'\n  <script type="application/ld+json">\n{json.dumps(service_schema, indent=2)}\n  </script>'
 
         # Event schema (WP5) — one per real dated session on this page.
         # Only ever emitted when the feed has a future dated session, which
@@ -879,6 +935,9 @@ def build():
         html = html.replace('{{header}}',           page_header)
         html = html.replace('{{content}}',          content)
         html = html.replace('{{footer}}',           page_footer)
+        # Second pass: content/header/footer may themselves use {{css_path}}
+        # for depth-correct asset links (e.g. hero images in section files).
+        html = html.replace('{{css_path}}',         css_path)
 
         # Write output file (validate path stays within repo)
         out_path = os.path.join(REPO, output)
@@ -932,7 +991,9 @@ def build():
         if config.get('skip') or config.get('redirect_to'):
             continue
         output = config.get('output', '')
-        if not output.startswith('blog/'):
+        # The blog index itself is not a post: startswith('blog/') is true for
+        # it, so exclude it explicitly or it ships as a junk placeholder <item>.
+        if not output.startswith('blog/') or output == 'blog/index.html':
             continue
 
         # Skip if this post was already added by the new renderer
@@ -1010,22 +1071,34 @@ def build():
     generate_llms()
 
 
-def _sitemap_url_entry(loc, lastmod, changefreq, priority):
-    """Render one <url> block. Omits <lastmod> when not set."""
+def _sitemap_url_entry(loc, lastmod):
+    """Render one <url> block: loc + lastmod. changefreq/priority are dropped
+    (Google ignores both); lastmod is the field crawlers actually use."""
     lines = ['  <url>', f'    <loc>{loc}</loc>']
     if lastmod:
         lines.append(f'    <lastmod>{lastmod}</lastmod>')
-    lines.append(f'    <changefreq>{changefreq}</changefreq>')
-    lines.append(f'    <priority>{float(priority):.1f}</priority>')
     lines.append('  </url>')
     return '\n'.join(lines) + '\n'
 
 
+def _page_lastmod(page_path):
+    """YYYY-MM-DD from the newest source file in a page dir (config.json,
+    content.yaml, sections/*.html). Falls back to today if none stat-able."""
+    import datetime
+    candidates = [os.path.join(page_path, 'config.json'),
+                  os.path.join(page_path, 'content.yaml')]
+    candidates += glob.glob(os.path.join(page_path, 'sections', '*.html'))
+    mtimes = [os.path.getmtime(p) for p in candidates if os.path.exists(p)]
+    if not mtimes:
+        return datetime.date.today().isoformat()
+    return datetime.date.fromtimestamp(max(mtimes)).isoformat()
+
+
 def generate_sitemap(page_dirs):
-    """Generate sitemap.xml from page configs (config.json is the SSOT for
-    lastmod/changefreq/priority overrides on root pages; new-format blog
-    posts pull lastmod from YAML `last_updated`/`date` and can still override
-    changefreq/priority via config.json).
+    """Generate sitemap.xml from page configs. Each <url> carries only <loc>
+    and <lastmod> (changefreq/priority dropped — Google ignores them). lastmod
+    comes from config `lastmod`, new-format blog YAML `last_updated`/`date`, or
+    a fallback to the newest source-file mtime in the page dir.
 
     Exclusions: skip pages, redirect stubs, 404.html, any page whose
     effective robots value contains "noindex", and any new-format blog post
@@ -1071,7 +1144,6 @@ def generate_sitemap(page_dirs):
                 print(f'  ↷ sitemap: excluding {output} (canonical → {canonical})')
                 continue
             lastmod = data.get('last_updated') or data.get('date')
-            default_cf, default_pr = 'monthly', 0.7
             loc = own_url
         elif is_blog:
             # Old-format blog post fallback (none exist today, but keep the
@@ -1080,22 +1152,18 @@ def generate_sitemap(page_dirs):
             if 'noindex' in robots_value:
                 continue
             lastmod = config.get('date_modified') or config.get('date_published')
-            default_cf, default_pr = 'monthly', 0.7
             loc = page_url(output)
         else:
             robots_value = config.get('robots', 'index, follow')
             if 'noindex' in robots_value:
                 continue
             lastmod = config.get('lastmod')
-            if output == 'index.html':
-                default_cf, default_pr = 'weekly', 1.0
-            else:
-                default_cf, default_pr = 'monthly', 0.8
             loc = page_url(output)
 
-        changefreq = config.get('sitemap_changefreq', default_cf)
-        priority = config.get('sitemap_priority', default_pr)
-        xml = _sitemap_url_entry(loc, lastmod, changefreq, priority)
+        # lastmod is the one field crawlers use; fall back to source mtime.
+        if not lastmod:
+            lastmod = _page_lastmod(page_path)
+        xml = _sitemap_url_entry(loc, lastmod)
 
         if is_blog:
             blog_entries.append((lastmod or '', output, xml))
@@ -1181,9 +1249,14 @@ def generate_llms():
     entries.sort(key=lambda x: (x[0], x[1]), reverse=True)
     blog_block = '\n'.join(line for _, _, line in entries)
 
+    # Only emit the "## Blog" section when posts exist — no empty heading.
+    blog_section = ('\n## Blog\n\n' + blog_block + '\n') if blog_block else ''
+
     template_path = os.path.join(SRC, 'llms-template.txt')
     template = read(template_path)
-    llms_txt = template.replace('{{blog_entries}}', blog_block)
+    llms_txt = template.replace('{{blog_section}}', blog_section)
+    if not llms_txt.endswith('\n'):
+        llms_txt += '\n'
 
     with open(os.path.join(REPO, 'llms.txt'), 'w', encoding='utf-8') as f:
         f.write(llms_txt)

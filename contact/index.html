@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Set a .js flag so CSS only hides hero content (opacity:0) when JS runs;
+       without it the hero stays visible if scripts are blocked or fail. -->
+  <script>document.documentElement.className += ' js';</script>
   <meta name="msvalidate.01" content="9C97AFC25A8EE199FF51C4C6D7C46F2E" />
 
   <!-- Google tag (gtag.js) -->
@@ -15,13 +18,13 @@
   </script>
   <link rel="canonical" href="https://thefirstwater.co/contact/">
   <meta name="robots" content="index, follow">
-  <title>Contact — Firstwater Denver</title>
+  <title>Contact | Firstwater</title>
   <meta name="description" content="Write to Firstwater in Denver. Questions, venues, press, or a note about the next session.">
   <meta name="theme-color" content="#0A0B0D">
 
   <!-- Open Graph -->
   <link rel="alternate" type="application/rss+xml" title="Firstwater Blog" href="../rss.xml">
-  <meta property="og:title" content="Contact — Firstwater Denver">
+  <meta property="og:title" content="Contact | Firstwater">
   <meta property="og:description" content="Write to Firstwater in Denver. Questions, venues, press, or a note about the next session.">
   <meta property="og:url" content="https://thefirstwater.co/contact/">
   <meta property="og:type" content="website">
@@ -31,7 +34,7 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Contact — Firstwater Denver">
+  <meta name="twitter:title" content="Contact | Firstwater">
   <meta name="twitter:description" content="Write to Firstwater in Denver. Questions, venues, press, or a note about the next session.">
   <meta name="twitter:image" content="https://thefirstwater.co/img/og/contact.png">
 
@@ -58,9 +61,11 @@
   "knowsAbout": [
     "sound sessions",
     "sound baths",
+    "sound healing",
     "engineered sub-bass sound experiences",
     "group facilitation",
-    "rest and nervous system down-regulation"
+    "group sound sessions",
+    "deep rest"
   ],
   "sameAs": [
     "https://www.eventbrite.com/o/firstwater-121563830593"
@@ -81,7 +86,7 @@
     {
       "@type": "ListItem",
       "position": 2,
-      "name": "Contact \u2014 Firstwater Denver"
+      "name": "Contact"
     }
   ]
 }
@@ -91,7 +96,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap">
-  <link rel="stylesheet" href="../styles.css?v=166ceda8">
+  <link rel="stylesheet" href="../styles.css?v=846fc9c5">
   
 </head>
 <body>
@@ -109,7 +114,8 @@
       <li><a href="../about/">About</a></li>
       <li><a href="../faq/">FAQ</a></li>
       <li><a href="../blog/">Blog</a></li>
-      <li><a class="nav-cta" href="../sessions/">Get tickets</a></li>
+      <li><a href="../corporate/">Corporate</a></li>
+      <li><a class="nav-cta" href="../contact/#hear-first">Hear first</a></li>
     </ul>
   </nav>
 </header>
@@ -117,7 +123,7 @@
   <main>
   <section class="section section--dark hero-section page-hero">
   <div class="hero-media" aria-hidden="true">
-    <img src="{{css_path}}img/hero/contact.jpg" alt="">
+    <img src="../img/hero/contact.jpg" alt="">
   </div>
   <div class="container">
     <span class="eyebrow">Contact</span>
@@ -128,9 +134,34 @@
 
 <section class="section section--light">
   <div class="container">
+    <div class="hear-first" id="hear-first">
+      <span class="eyebrow">Hear first</span>
+      <p class="form-note">Leave your email and you will hear when the next session goes up.</p>
+      <form class="contact-form hear-first-form" action="https://formspree.io/f/xgopwepl" method="POST">
+        <input type="hidden" name="_subject" value="FIRSTWATER list join">
+        <input type="hidden" name="_next" value="https://thefirstwater.co/thanks/">
+        <input type="hidden" name="venture" value="firstwater">
+        <input type="hidden" name="list_join" value="yes">
+        <label class="form-field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <button type="submit" class="btn btn-primary">Hear first</button>
+      </form>
+    </div>
+
     <form class="contact-form" action="https://formspree.io/f/xgopwepl" method="POST">
       <input type="hidden" name="_subject" value="FIRSTWATER contact form">
+      <input type="hidden" name="_next" value="https://thefirstwater.co/thanks/">
       <input type="hidden" name="venture" value="firstwater">
+      <label class="form-field">
+        <span>What is this about</span>
+        <select name="topic">
+          <option>Booking a team or group</option>
+          <option>A question</option>
+          <option>Press or venues</option>
+        </select>
+      </label>
       <label class="form-field">
         <span>Name</span>
         <input type="text" name="name" autocomplete="name" required>
@@ -141,7 +172,7 @@
       </label>
       <label class="form-field">
         <span>Message</span>
-        <textarea name="message" rows="6" required></textarea>
+        <textarea name="message" rows="6"></textarea>
       </label>
       <label class="form-check">
         <input type="checkbox" name="notify_next_session" value="yes">
@@ -165,6 +196,7 @@
       <li><a href="../contact/">Contact</a></li>
     </ul>
     <p class="footer-fine">Denver, Colorado.</p>
+    <p class="footer-fine"><a href="https://www.eventbrite.com/o/firstwater-121563830593">Tickets live on Eventbrite</a></p>
   </div>
 </footer>
 
@@ -181,8 +213,10 @@
     let mouseX = 0.5, mouseSmX = 0.5;
     const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
+    // Lower grid + 30fps cap vs. the entuned original: this canvas is a ground
+    // under real content, so it must never contend with the page for the main thread.
     const isMobile = window.innerWidth < 768;
-    const GRID = isMobile ? 160 : 260;
+    const GRID = isMobile ? 120 : 180;
     const field = new Float32Array(GRID * GRID);
 
     function resize() {
@@ -262,7 +296,7 @@
     var time = 0;
 
     function draw() {
-      if (!reduceMotion) time += 0.016;
+      if (!reduceMotion) time += 0.032;
 
       var scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       var rawScroll = window.scrollY / scrollMax;
@@ -315,10 +349,21 @@
       drawSegs(marchingSquares(field, GRID, GRID, 0), ICE, 0.16, 0.7, offX, offY, cellW, cellH);
       drawSegs(marchingSquares(field, GRID, GRID, 0.12), PAPER, 0.05, 0.4, offX, offY, cellW, cellH);
       drawSegs(marchingSquares(field, GRID, GRID, -0.12), PAPER, 0.05, 0.4, offX, offY, cellW, cellH);
-      drawSegs(marchingSquares(field, GRID, GRID, 0.3), ICE, 0.03, 0.2, offX, offY, cellW, cellH);
-      drawSegs(marchingSquares(field, GRID, GRID, -0.3), ICE, 0.03, 0.2, offX, offY, cellW, cellH);
+    }
 
-      if (!reduceMotion) requestAnimationFrame(draw);
+    // Adaptive cadence — start at 30fps, back off when draw() is expensive
+    // (slow devices, software rendering) so the page never fights the canvas.
+    var frameTick = 0, frameDiv = 2, emaMs = 0;
+    function loop() {
+      frameTick++;
+      if (frameTick % frameDiv === 0) {
+        var t0 = performance.now();
+        draw();
+        var dt = performance.now() - t0;
+        emaMs = emaMs ? emaMs * 0.9 + dt * 0.1 : dt;
+        frameDiv = Math.min(10, Math.max(2, Math.round(emaMs / 7) + 1));
+      }
+      requestAnimationFrame(loop);
     }
 
     function drawSegs(segs, colorStr, alpha, lineWidth, offX, offY, cellW, cellH) {
@@ -336,7 +381,7 @@
     }
 
     resize();
-    if (reduceMotion) { draw(); } else { requestAnimationFrame(draw); }
+    if (reduceMotion) { draw(); } else { requestAnimationFrame(loop); }
   })();
   </script>
 

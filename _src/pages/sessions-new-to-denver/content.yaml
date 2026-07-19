@@ -1,7 +1,7 @@
 title: "New to Denver"
 slug: "new-to-denver"
 eyebrow: "A SOUND SESSION"
-dek: "For people who just moved here. Social on purpose."
+dek: "This one is for people who just moved to Denver, and it is social on purpose."
 hero:
   src: "../../img/hero/session-new-to-denver.jpg"
   alt: "The Denver skyline at night under heavy cloud"
@@ -23,5 +23,8 @@ sections:
 
   - type: prose
     body: |
-      First date being set. [Write to us](../../contact/) and check the box, and
-      you will hear before the poster does.
+      You come alone to this one, and so does almost everyone else. First date
+      being set. [Write to us](../../contact/) and check the box, and you will
+      hear first.
+
+      [All sessions](../../sessions/)

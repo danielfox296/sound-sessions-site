@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Set a .js flag so CSS only hides hero content (opacity:0) when JS runs;
+       without it the hero stays visible if scripts are blocked or fail. -->
+  <script>document.documentElement.className += ' js';</script>
   <meta name="msvalidate.01" content="9C97AFC25A8EE199FF51C4C6D7C46F2E" />
 
   <!-- Google tag (gtag.js) -->
@@ -60,8 +63,10 @@
     let mouseX = 0.5, mouseSmX = 0.5;
     const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
+    // Lower grid + 30fps cap vs. the entuned original: this canvas is a ground
+    // under real content, so it must never contend with the page for the main thread.
     const isMobile = window.innerWidth < 768;
-    const GRID = isMobile ? 160 : 260;
+    const GRID = isMobile ? 120 : 180;
     const field = new Float32Array(GRID * GRID);
 
     function resize() {
@@ -141,7 +146,7 @@
     var time = 0;
 
     function draw() {
-      if (!reduceMotion) time += 0.016;
+      if (!reduceMotion) time += 0.032;
 
       var scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       var rawScroll = window.scrollY / scrollMax;
@@ -194,10 +199,21 @@
       drawSegs(marchingSquares(field, GRID, GRID, 0), ICE, 0.16, 0.7, offX, offY, cellW, cellH);
       drawSegs(marchingSquares(field, GRID, GRID, 0.12), PAPER, 0.05, 0.4, offX, offY, cellW, cellH);
       drawSegs(marchingSquares(field, GRID, GRID, -0.12), PAPER, 0.05, 0.4, offX, offY, cellW, cellH);
-      drawSegs(marchingSquares(field, GRID, GRID, 0.3), ICE, 0.03, 0.2, offX, offY, cellW, cellH);
-      drawSegs(marchingSquares(field, GRID, GRID, -0.3), ICE, 0.03, 0.2, offX, offY, cellW, cellH);
+    }
 
-      if (!reduceMotion) requestAnimationFrame(draw);
+    // Adaptive cadence — start at 30fps, back off when draw() is expensive
+    // (slow devices, software rendering) so the page never fights the canvas.
+    var frameTick = 0, frameDiv = 2, emaMs = 0;
+    function loop() {
+      frameTick++;
+      if (frameTick % frameDiv === 0) {
+        var t0 = performance.now();
+        draw();
+        var dt = performance.now() - t0;
+        emaMs = emaMs ? emaMs * 0.9 + dt * 0.1 : dt;
+        frameDiv = Math.min(10, Math.max(2, Math.round(emaMs / 7) + 1));
+      }
+      requestAnimationFrame(loop);
     }
 
     function drawSegs(segs, colorStr, alpha, lineWidth, offX, offY, cellW, cellH) {
@@ -215,7 +231,7 @@
     }
 
     resize();
-    if (reduceMotion) { draw(); } else { requestAnimationFrame(draw); }
+    if (reduceMotion) { draw(); } else { requestAnimationFrame(loop); }
   })();
   </script>
 

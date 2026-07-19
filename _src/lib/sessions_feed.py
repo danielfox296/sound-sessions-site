@@ -33,6 +33,7 @@ The checkout endpoint expects a POST; we render a form with a
 import html
 import json
 import os
+import re
 import urllib.request
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -330,6 +331,51 @@ def render_sessions_block(sessions, nav_prefix):
         f'</section>\n'
         f'<script src="{_esc(nav_prefix)}js/sessions.js" defer></script>'
     )
+
+
+# ---------------------------------------------------------------------------
+# Session page chrome — session pages reuse the blog article template but must
+# not wear its byline / read-time / reading-progress costume (they are selling
+# pages, not posts). build.py post-processes the rendered article: strip the
+# progress bar, byline, and blog JS, then drop in a plain status line.
+# ---------------------------------------------------------------------------
+
+_PROGRESS_RE = re.compile(
+    r'<!-- Reading progress bar -->\s*<div class="blog-progress".*?</div>\s*</div>',
+    re.DOTALL,
+)
+_BYLINE_RE = re.compile(r'<div class="blog-byline">.*?</div>', re.DOTALL)
+_BLOG_JS_RE = re.compile(r'<!-- Blog-specific JS.*?</script>', re.DOTALL)
+
+
+def status_line(sessions, fallback='Denver · first date being set'):
+    """Plain status text for a session page header.
+
+    With a live dated session: 'Denver · September 18 · Venue'.
+    Without one: the fallback (a page config may override it, e.g. the
+    recorded Sleep Descent, which has no date to set).
+    """
+    if sessions:
+        s = sessions[0]
+        bits = ['Denver', fmt_date_short(s['starts_at'])]
+        venue = (s.get('venue') or {}).get('name')
+        if venue:
+            bits.append(venue)
+        text = ' · '.join(bits)
+    else:
+        text = fallback
+    return f'<p class="blog-byline session-status">{html.escape(text)}</p>'
+
+
+def strip_blog_chrome(content, status_html):
+    """Strip the blog byline/read-time, reading-progress bar, and blog JS from
+    a rendered session article, putting the status line where the byline was.
+    Blog posts never pass through here, so they keep both. Returns the HTML."""
+    content = _PROGRESS_RE.sub('', content, count=1)
+    # lambda replacement so backslashes/group refs in status_html are literal.
+    content = _BYLINE_RE.sub(lambda _m: status_html, content, count=1)
+    content = _BLOG_JS_RE.sub('', content, count=1)
+    return content
 
 
 # ---------------------------------------------------------------------------

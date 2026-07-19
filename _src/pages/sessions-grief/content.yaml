@@ -1,10 +1,10 @@
 title: "Grief"
 slug: "grief"
 eyebrow: "A SOUND SESSION"
-dek: "For people carrying a death. Denver. Being built slowly."
+dek: "This one is for people in Denver carrying a death, and we are building it slowly."
 hero:
   src: "../../img/hero/session-grief.jpg"
-  alt: "Daylight through a window into a dark room"
+  alt: "A knit blanket, an open book, and a lit candle on a chair"
 date: "2026-07-16"
 last_updated: "2026-07-16"
 author:
@@ -23,5 +23,9 @@ sections:
   - type: prose
     body: |
       This one is being built slowly, with the most care of anything on this
-      site. [Write to us](../../contact/) and check the box, and you will hear
-      when it is ready.
+      site. If what you are carrying is the end of a relationship rather than a
+      death, [Healing from Breakups](../healing-from-breakups/) is built for that.
+      [Write to us](../../contact/) and check the box, and you will hear when it
+      is ready.
+
+      [All sessions](../../sessions/)

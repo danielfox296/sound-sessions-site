@@ -11,9 +11,34 @@
 
 <section class="section section--light">
   <div class="container">
+    <div class="hear-first" id="hear-first">
+      <span class="eyebrow">Hear first</span>
+      <p class="form-note">Leave your email and you will hear when the next session goes up.</p>
+      <form class="contact-form hear-first-form" action="https://formspree.io/f/xgopwepl" method="POST">
+        <input type="hidden" name="_subject" value="FIRSTWATER list join">
+        <input type="hidden" name="_next" value="https://thefirstwater.co/thanks/">
+        <input type="hidden" name="venture" value="firstwater">
+        <input type="hidden" name="list_join" value="yes">
+        <label class="form-field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <button type="submit" class="btn btn-primary">Hear first</button>
+      </form>
+    </div>
+
     <form class="contact-form" action="https://formspree.io/f/xgopwepl" method="POST">
       <input type="hidden" name="_subject" value="FIRSTWATER contact form">
+      <input type="hidden" name="_next" value="https://thefirstwater.co/thanks/">
       <input type="hidden" name="venture" value="firstwater">
+      <label class="form-field">
+        <span>What is this about</span>
+        <select name="topic">
+          <option>Booking a team or group</option>
+          <option>A question</option>
+          <option>Press or venues</option>
+        </select>
+      </label>
       <label class="form-field">
         <span>Name</span>
         <input type="text" name="name" autocomplete="name" required>
@@ -24,7 +49,7 @@
       </label>
       <label class="form-field">
         <span>Message</span>
-        <textarea name="message" rows="6" required></textarea>
+        <textarea name="message" rows="6"></textarea>
       </label>
       <label class="form-check">
         <input type="checkbox" name="notify_next_session" value="yes">

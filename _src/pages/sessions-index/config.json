@@ -1,6 +1,7 @@
 {
-  "title": "Sessions \u2014 Facilitated Sound Sessions in Denver",
+  "title": "Sound Sessions in Denver | Firstwater",
   "meta_description": "The sessions: Healing from Breakups, Sunday Downshift, Grief, New to Denver, Couples, Quiet New Year's, and more. Each night is built around something worth putting down.",
   "output": "sessions/index.html",
+  "breadcrumb": "Sessions",
   "og_image": "img/og/sessions.png"
 }

@@ -1,6 +1,7 @@
 {
-  "title": "Blog \u2014 Firstwater",
+  "title": "Blog | Firstwater",
   "meta_description": "Writing on sound, rooms, and what people put down in them. From the producer behind Denver sound sessions.",
   "output": "blog/index.html",
+  "breadcrumb": "Blog",
   "og_image": "img/og/blog.png"
 }

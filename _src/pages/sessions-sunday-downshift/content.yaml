@@ -1,7 +1,7 @@
 title: "Sunday Downshift"
 slug: "sunday-downshift"
 eyebrow: "A SOUND SESSION"
-dek: "The weekly anchor. Denver. Being built."
+dek: "This is the weekly anchor for Sunday evenings in Denver, and we are building it now."
 hero:
   src: "../../img/hero/session-sunday-downshift.jpg"
   alt: "A mug on a dark table"
@@ -16,11 +16,34 @@ tags: [sessions, denver]
 sections:
   - type: prose
     body: |
-      A recurring session for the end of the week. You close Sunday lying down in
-      seventy-five minutes of engineered sound instead of scrolling toward Monday,
-      and you start the week from a different floor.
+      By Sunday evening you can already feel Monday. It starts around four or
+      five: you notice the pull toward the week ahead, you run the list in your
+      head, and you spend the last of the weekend bracing instead of resting.
+      Maybe someone who loves you sent you this link, because they watch you do
+      this every Sunday.
+
+  - type: subhead
+    text: "The night, plainly"
+
+  - type: prose
+    body: |
+      This one is built for Sunday evenings: seventy-five minutes of engineered
+      sound in a room in Denver, low light, a formal opening and a formal close.
+      You lie down under blankets and you do nothing with the coming week for the
+      length of it. You start Monday from a different floor than the one you would
+      have started it from.
+
+  - type: prose
+    body: |
+      Most people leave having actually stopped, some for the first time all week,
+      and they carry a little of that stillness into Monday morning.
+
+  - type: subhead
+    text: "The first Sunday"
 
   - type: prose
     body: |
       This one becomes weekly once its room is set. [Write to us](../../contact/)
       and check the box, and you will hear when the first Sunday goes up.
+
+      [All sessions](../../sessions/)
