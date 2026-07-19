@@ -5,14 +5,19 @@
     {
       "name": "Sacred Rest Ritual",
       "operator": "Sacred Society",
+      "facilitator": "Vialet Rayne",
       "starts_at": "2026-07-19T18:00:00-06:00",
       "venue": "Sacred Society",
       "address": "3200 Larimer St",
       "city": "Denver",
       "neighborhood": "RiNo",
       "price": "$45",
+      "image_url": "https://images.squarespace-cdn.com/content/sacred-society/sacred-rest-ritual.jpg",
       "ticket_url": "https://www.eventbrite.com/e/sacred-rest-ritual-sun-jul-19",
+      "operator_url": "https://sacredsocietydenver.com/",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/d/co--denver/sound-healing/",
+      "description": "",
       "tags": [
         "sound bath"
       ],
@@ -25,14 +30,19 @@
     {
       "name": "Sunday Community Sound Bath",
       "operator": "Boulder Sound Collective",
+      "facilitator": "",
       "starts_at": "2026-07-19T19:30:00-06:00",
       "venue": "The Riverside",
       "address": "1724 Broadway",
       "city": "Boulder",
       "neighborhood": null,
       "price": "Donation",
+      "image_url": "",
       "ticket_url": "https://www.meetup.com/boulder-sound/events/sun-jul-19",
+      "operator_url": "https://www.meetup.com/boulder-sound/",
+      "venue_url": "https://theriversideboulder.com/",
       "source_url": "https://www.meetup.com/find/?keywords=sound%20bath&location=Boulder",
+      "description": "A community sound bath at The Riverside in downtown Boulder, held Sunday evenings and offered by donation.",
       "tags": [
         "sound bath",
         "meditation+sound"
@@ -46,14 +56,19 @@
     {
       "name": "Full Moon Sound Bath",
       "operator": "5 Star Salt Caves",
+      "facilitator": "Melissa Kae",
       "starts_at": "2026-07-24T19:00:00-06:00",
       "venue": "5 Star Salt Caves",
       "address": "5450 W 38th Ave",
       "city": "Denver",
       "neighborhood": "West Highland",
       "price": "$40",
+      "image_url": "https://img.evbuc.com/full-moon-sound-bath/original.jpg",
       "ticket_url": "https://www.eventbrite.com/e/full-moon-sound-bath-fri-jul-24",
+      "operator_url": "https://5starsaltcaves.com/",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/d/co--denver/sound-bath/",
+      "description": "",
       "tags": [
         "sound bath",
         "moon-themed"
@@ -67,14 +82,19 @@
     {
       "name": "Candlelight Gong Bath",
       "operator": "Mile High Healing Vibe",
+      "facilitator": "",
       "starts_at": "2026-07-25T19:00:00-06:00",
       "venue": "Samadhi Center",
       "address": "639 E 19th Ave",
       "city": "Denver",
       "neighborhood": "Uptown",
       "price": "$35",
+      "image_url": "https://img.evbuc.com/candlelight-gong-bath/original.jpg",
       "ticket_url": "https://www.eventbrite.com/e/candlelight-gong-bath-sat-jul-25",
+      "operator_url": "https://milehighhealingvibe.com/",
+      "venue_url": "https://samadhicenter.org/",
       "source_url": "https://www.eventbrite.com/d/co--denver/gong/",
+      "description": "A candlelit gong bath at the Samadhi Center in Uptown Denver, Saturday evening.",
       "tags": [
         "sound bath",
         "gong"
@@ -88,14 +108,19 @@
     {
       "name": "Breathwork & Sound Bath Journey",
       "operator": "NoCo Breath",
+      "facilitator": "Cody Reith",
       "starts_at": "2026-07-25T18:00:00-06:00",
       "venue": "Fort Collins Yoga Collective",
       "address": "212 Laporte Ave",
       "city": "Fort Collins",
       "neighborhood": null,
       "price": "$30",
+      "image_url": "",
       "ticket_url": "https://www.eventbrite.com/e/breathwork-sound-bath-sat-jul-25",
+      "operator_url": "https://nocobreath.com/",
+      "venue_url": "https://fortcollinsyogacollective.com/",
       "source_url": "https://www.eventbrite.com/d/co--fort-collins/sound-bath/",
+      "description": "",
       "tags": [
         "breathwork+sound",
         "sound bath"
@@ -109,14 +134,19 @@
     {
       "name": "Sunday Sound Bath at the Springs",
       "operator": "Manitou Sound",
+      "facilitator": "",
       "starts_at": "2026-07-26T16:00:00-06:00",
       "venue": "Manitou Art Center",
       "address": "513 Manitou Ave",
       "city": "Colorado Springs",
       "neighborhood": null,
       "price": "$25",
+      "image_url": "https://img.evbuc.com/sunday-sound-bath-springs/original.jpg",
       "ticket_url": "https://www.eventbrite.com/e/sunday-sound-bath-springs-jul-26",
+      "operator_url": "",
+      "venue_url": "https://manitouartcenter.org/",
       "source_url": "https://www.eventbrite.com/d/co--colorado-springs/sound-bath/",
+      "description": "A Sunday-afternoon sound bath at the Manitou Art Center in Colorado Springs.",
       "tags": [
         "sound bath"
       ],
@@ -129,14 +159,19 @@
     {
       "name": "Singing Bowls at the Gardens",
       "operator": "Denver Botanic Gardens",
+      "facilitator": "",
       "starts_at": "2026-07-29T18:30:00-06:00",
       "venue": "Denver Botanic Gardens",
       "address": "1007 York St",
       "city": "Denver",
       "neighborhood": "Cheesman Park",
       "price": "$30–38",
+      "image_url": "https://www.botanicgardens.org/sites/default/files/singing-bowls.jpg",
       "ticket_url": "https://www.botanicgardens.org/events/singing-bowls-jul-29",
+      "operator_url": "https://www.botanicgardens.org/",
+      "venue_url": "",
       "source_url": "https://www.botanicgardens.org/events",
+      "description": "",
       "tags": [
         "sound bath"
       ],
@@ -149,14 +184,19 @@
     {
       "name": "Friday Night Sound Bath",
       "operator": "Karma Yoga Center",
+      "facilitator": "Anandra George",
       "starts_at": "2026-07-31T19:00:00-06:00",
       "venue": "Karma Yoga Center",
       "address": "3111 28th St",
       "city": "Boulder",
       "neighborhood": null,
       "price": "$20",
+      "image_url": "https://images.squarespace-cdn.com/content/karma-yoga/friday-sound-bath.jpg",
       "ticket_url": "https://karmayogacenter.com/events/friday-sound-bath-jul-31",
+      "operator_url": "https://karmayogacenter.com/",
+      "venue_url": "",
       "source_url": "https://karmayogacenter.com/schedule",
+      "description": "A Friday-night sound bath at the Karma Yoga Center in Boulder.",
       "tags": [
         "yoga+sound",
         "sound bath"
@@ -170,14 +210,19 @@
     {
       "name": "Fascia Release + Sound Bath",
       "operator": "Wash Park Wellness",
+      "facilitator": "",
       "starts_at": "2026-08-05T19:00:00-06:00",
       "venue": "Wash Park Wellness",
       "address": "1080 S Gaylord St",
       "city": "Denver",
       "neighborhood": "Wash Park",
       "price": "$48",
+      "image_url": "https://img.evbuc.com/fascia-release-sound-bath/original.jpg",
       "ticket_url": "https://www.eventbrite.com/e/fascia-release-sound-bath-aug-5",
+      "operator_url": "https://washparkwellness.com/",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/d/co--denver/sound-bath/",
+      "description": "",
       "tags": [
         "sound bath",
         "yoga+sound"
@@ -191,14 +236,19 @@
     {
       "name": "New Moon Sound Journey",
       "operator": "Loveland Sound",
+      "facilitator": "Sharon Vaughn",
       "starts_at": "2026-08-08T18:30:00-06:00",
       "venue": "Loveland Yoga Co-op",
       "address": "425 Cleveland Ave",
       "city": "Fort Collins",
       "neighborhood": null,
       "price": "$28",
+      "image_url": "https://img.evbuc.com/new-moon-sound-journey/original.jpg",
       "ticket_url": "https://www.eventbrite.com/e/new-moon-sound-journey-aug-8",
+      "operator_url": "",
+      "venue_url": "https://lovelandyoga.com/",
       "source_url": "https://www.eventbrite.com/d/co--fort-collins/sound-healing/",
+      "description": "A new-moon sound journey at the Loveland Yoga Co-op, held on a Saturday evening.",
       "tags": [
         "sound bath",
         "moon-themed"
@@ -212,14 +262,19 @@
     {
       "name": "Gong Immersion",
       "operator": "Soundularity",
+      "facilitator": "",
       "starts_at": "2026-07-30T19:00:00-06:00",
       "venue": "The Denver Village",
       "address": "1600 Dallas St",
       "city": "Denver",
       "neighborhood": "Aurora",
       "price": "$40",
+      "image_url": "",
       "ticket_url": "https://www.eventbrite.com/e/gong-immersion-jul-30",
+      "operator_url": "",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/o/soundularity",
+      "description": "",
       "tags": [
         "gong",
         "sound bath"
@@ -233,14 +288,19 @@
     {
       "name": "Chakra Sound Alignment",
       "operator": "Harmonist Sanctuary",
+      "facilitator": "",
       "starts_at": "2026-08-01T18:00:00-06:00",
       "venue": "Harmonist Sanctuary",
       "address": "2115 Pearl St",
       "city": "Boulder",
       "neighborhood": null,
       "price": "$55",
+      "image_url": "",
       "ticket_url": "https://www.eventbrite.com/e/chakra-sound-alignment-aug-1",
+      "operator_url": "",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/o/harmonist-sanctuary",
+      "description": "",
       "tags": [
         "sound bath"
       ],
@@ -253,14 +313,19 @@
     {
       "name": "Cosmic DJ Sound Bath Rave",
       "operator": "Third Eye Collective",
+      "facilitator": "",
       "starts_at": "2026-07-27T21:00:00-06:00",
       "venue": "Warehouse 21",
       "address": "2100 Market St",
       "city": "Denver",
       "neighborhood": "Ballpark",
       "price": "$60",
+      "image_url": "",
       "ticket_url": "https://www.eventbrite.com/e/cosmic-dj-sound-bath-rave-jul-27",
+      "operator_url": "",
+      "venue_url": "",
       "source_url": "https://www.eventbrite.com/e/cosmic-dj-sound-bath-rave-jul-27",
+      "description": "",
       "tags": [
         "sound bath"
       ],
@@ -269,6 +334,31 @@
       "status": "rejected",
       "note": "",
       "rejection_note": "Off the curation bar: club night with a sound-bath label, not a room Daniel would send anyone to."
+    },
+    {
+      "name": "Riverfront Sound Bath",
+      "operator": "River North Sound",
+      "facilitator": "Ari Cohen",
+      "starts_at": "2026-07-12T18:00:00-06:00",
+      "venue": "Grace Studio",
+      "address": "3542 Walnut St",
+      "city": "Denver",
+      "neighborhood": "RiNo",
+      "price": "$30",
+      "image_url": "https://img.evbuc.com/riverfront-sound-bath/original.jpg",
+      "ticket_url": "https://www.eventbrite.com/e/riverfront-sound-bath-jul-12",
+      "operator_url": "https://rivernorthsound.com/",
+      "venue_url": "",
+      "source_url": "https://www.eventbrite.com/d/co--denver/sound-bath/",
+      "description": "A riverside sound bath at Grace Studio in RiNo, held on a Sunday evening.",
+      "tags": [
+        "sound bath"
+      ],
+      "confidence": 0.9,
+      "dedup_key": "riverfront sound bath|2026-07-12|grace studio",
+      "status": "approved",
+      "note": "",
+      "rejection_note": null
     }
   ]
 }
