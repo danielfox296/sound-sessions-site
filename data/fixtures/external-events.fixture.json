@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-19T04:00:00-06:00",
+  "events": [
+    {
+      "name": "Fixture Sound Bath",
+      "operator": "Fixture Operator",
+      "starts_at": "2026-09-25T19:00:00-06:00",
+      "venue": "Fixture Studio",
+      "address": "100 Test St",
+      "city": "Denver",
+      "neighborhood": "Highlands",
+      "price": "$35",
+      "ticket_url": "https://example.com/tickets/fixture-sound-bath",
+      "source_url": "https://example.com/fixture-source",
+      "tags": ["sound bath"],
+      "confidence": 0.95,
+      "dedup_key": "fixture sound bath|2026-09-25|fixture studio",
+      "status": "approved",
+      "note": "",
+      "rejection_note": null
+    },
+    {
+      "name": "Fixture Candidate (must not render)",
+      "operator": "Fixture Operator",
+      "starts_at": "2026-09-26T19:00:00-06:00",
+      "venue": "Fixture Studio",
+      "address": "100 Test St",
+      "city": "Boulder",
+      "neighborhood": null,
+      "price": "Free",
+      "ticket_url": "https://example.com/tickets/fixture-candidate",
+      "source_url": "https://example.com/fixture-source-2",
+      "tags": ["sound bath"],
+      "confidence": 0.6,
+      "dedup_key": "fixture candidate must not render|2026-09-26|fixture studio",
+      "status": "candidate",
+      "note": "",
+      "rejection_note": null
+    }
+  ]
+}
