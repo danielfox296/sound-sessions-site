@@ -64,11 +64,18 @@ he departs from it whenever it serves.
 - "If you'd rather stay on the floor, that's what the floor is for."
 - "Say so and your ticket comes back."
 - "Doors close at start time and stay closed."
-- Entity block (name settled 2026-07-18): "Firstwater is a sound session
-  facilitator in Denver who leads engineered sound experiences: deep-listening
-  events built with sub-bass, studio-grade production, and formal ceremony.
-  Themed sessions include Healing from Breakups." — verbatim across home,
-  About, GBP, Eventbrite, Insight Timer, all bios.
+- Entity block (Daniel's own words, ratified 2026-07-18; supersedes the
+  site-plan draft): "The sessions that we hold at Firstwater in Denver gather
+  people from all walks of life and states into a place of gratitude,
+  stillness, and joy. Each ceremony uses expert facilitation, healing sound,
+  and sometimes movement and exercises to provide an opening that didn't
+  exist before you got there. Come exactly as you please. This is a place
+  where you can lay down things that don't serve you, or leave a completely
+  different person." Verbatim across home, About, GBP, Eventbrite, Insight
+  Timer, all bios. Register note: mysterious but non-woo, hopeful, communal;
+  never explain the evening; never call the sound a doorway; never treat
+  "the room" as an object. "Healing sound" is Daniel's own usage here and is
+  canonical inside this block only.
 
 ## Structure for selling pages
 Direct-response architecture under ceremony diction: hook in the reader's
