@@ -29,10 +29,25 @@ FEED CONTRACT (GET {CALENDAR_FEED_URL}), shape:
     "city": "Denver|Boulder|Fort Collins|Colorado Springs",
     "neighborhood": <str|null>,
     "price","ticket_url","source_url","tags":[...],
-    "confidence": <0..1>, "dedup_key","status","note","rejection_note" } ] }
+    "confidence": <0..1>, "dedup_key","status","note","rejection_note",
+    # v2 (all optional; "" when unknown):
+    "image_url",       # listing image / flyer (og:image). http(s) only, scrubbed.
+    "facilitator",     # the PERSON leading the session (distinct from operator).
+    "operator_url",    # the operator's OWN page. http(s) only, scrubbed.
+    "venue_url",       # the venue's OWN page, when distinct. http(s) only, scrubbed.
+    "description" } ] }# factual, original 1-2 sentence description of the event.
 Timestamps ISO-8601 with offset (America/Denver local). Only status="approved"
 events are ever rendered; candidate/rejected never leave the service and are
 filtered here too as a belt-and-braces guard.
+
+NOTE vs DESCRIPTION: `note` is Daniel's editorial one-liner (his opinion, his
+voice, verbatim only, usually empty) — the moat. `description` is a NEUTRAL
+FACTUAL sentence stating what the event IS, never whether it's good. When
+`description` is empty the build synthesizes a deterministic TEMPLATE
+description from the structured fields (see template_description) so no row or
+permalink is ever thin. Precedence for any descriptive text: `note` is the
+editorial line (rendered distinctly), description-or-template is the factual
+line (always rendered).
 """
 
 import html
@@ -43,6 +58,7 @@ import unicodedata
 import urllib.request
 from collections import OrderedDict
 from datetime import datetime, timedelta, timezone
+from urllib.parse import quote_plus
 
 from _src.lib import sessions_feed
 from _src.lib.sessions_feed import DENVER, parse_iso
@@ -250,6 +266,12 @@ def fmt_stamp_date(now):
     return f'{d.strftime("%B")} {_day(d.strftime("%d"))}, {d.year}'
 
 
+def stamp_date_iso(now):
+    """The same stamp date as an ISO date (America/Denver): '2026-07-19'.
+    Used for schema.org dateModified so it matches the visible stamp."""
+    return now.astimezone(DENVER).date().isoformat()
+
+
 def _now_utc(now):
     return now or datetime.now(timezone.utc)
 
@@ -298,6 +320,13 @@ def _external_row(e):
         'source_url': e.get('source_url', ''),
         'tags': e.get('tags', []) or [],
         'dedup_key': e.get('dedup_key', ''),
+        # v2 fields — the three URLs are scheme-scrubbed exactly like ticket_url
+        # (attacker-influenced third-party listing data on a public page).
+        'image_url': _safe_ext_url(e.get('image_url', '')),
+        'facilitator': (e.get('facilitator', '') or '').strip(),
+        'operator_url': _safe_ext_url(e.get('operator_url', '')),
+        'venue_url': _safe_ext_url(e.get('venue_url', '')),
+        'description': (e.get('description', '') or '').strip(),
         '_ext': e,
         '_sess': None,
         '_event_title': None,
@@ -365,6 +394,15 @@ def _firstwater_row(s):
         'source_url': '',
         'tags': [],
         'dedup_key': f'firstwater|{slug}|{_denver(s["starts_at"]).strftime("%Y-%m-%d")}',
+        # v2 fields — Firstwater rows carry no listing image (their distinction is
+        # treatment, not a flyer) and link to their own rich session page; the
+        # factual line still renders from the template. facilitator/urls stay
+        # empty here (the session page is authoritative for its own detail).
+        'image_url': '',
+        'facilitator': '',
+        'operator_url': '',
+        'venue_url': '',
+        'description': '',
         '_ext': None,
         '_sess': s,
         '_event_title': title,
@@ -461,6 +499,230 @@ def weekend_rows(rows, now=None):
     return out
 
 
+def week_rows(rows, now=None):
+    """Rows starting within the next seven days — the 'this week' answer window
+    used by the machine-extractable summary sentence."""
+    now = _now_utc(now)
+    end = now + timedelta(days=7)
+    out = [r for r in rows if now < parse_iso(r['starts_at']) <= end]
+    out.sort(key=lambda r: parse_iso(r['starts_at']))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Factual description (field-or-template), editorial note, alt text, slugs.
+# The template is the deterministic FALLBACK used when a row carries no authored
+# `description`: a clean, factual sentence built from the structured fields so
+# every row and permalink renders non-thin. It never evaluates the event (no
+# praise, no woo) — that is `note`'s job, and `note` is Daniel's verbatim alone.
+# ---------------------------------------------------------------------------
+
+# Tag -> lead noun phrase, most specific first. Theme modifiers (e.g.
+# "moon-themed") are intentionally skipped: the lead states the FORMAT.
+_LEAD_PHRASES = (
+    ('gong', 'A gong bath'),
+    ('breathwork+sound', 'A breathwork and sound session'),
+    ('guided-meditation', 'A guided meditation with sound'),
+    ('meditation+sound', 'A guided meditation with sound'),
+    ('sound-forward yoga', 'A sound-forward yoga session'),
+    ('yoga+sound', 'A sound-forward yoga session'),
+    ('singing-bowl', 'A singing-bowl session'),
+    ('sound healing', 'A sound healing session'),
+    ('sound bath', 'A sound bath'),
+)
+
+
+def _lead_phrase(tags):
+    tset = {str(t).lower() for t in (tags or [])}
+    for tag, phrase in _LEAD_PHRASES:
+        if tag in tset:
+            return phrase
+    return 'A sound session'
+
+
+def _price_phrase(price):
+    """A factual price sentence, or '' when the price is unknown. Mirrors the
+    JSON-LD price reading (accurate or absent) so the sentence never guesses."""
+    kind = _parse_price(price)
+    if kind[0] == 'free':
+        return 'Free to attend.'
+    if kind[0] == 'fixed':
+        return f'Tickets are ${_fmt_price_num(kind[1])}.'
+    if kind[0] == 'range':
+        return f'Tickets ${_fmt_price_num(kind[1])}–${_fmt_price_num(kind[2])}.'
+    if price and _DONATION_RE.search(price):
+        return 'Offered by donation.'
+    return ''
+
+
+def template_description(row):
+    """Deterministic factual sentence for a row from its structured fields.
+
+    Shape: "{lead}{ led by F}{ at V}{ in P}, {Weekday} at {time}. {price}."
+    Clean and natural, never robotic, never editorial. Always non-empty (the
+    lead and day/time always resolve), so it is a safe fallback for an empty
+    authored `description`.
+    """
+    clause = [_lead_phrase(row.get('tags'))]
+    facilitator = (row.get('facilitator') or '').strip()
+    if facilitator:
+        clause.append(f'led by {facilitator}')
+    venue = (row.get('venue') or '').strip()
+    if venue:
+        clause.append(f'at {venue}')
+    place = row.get('neighborhood') if row.get('city') == 'Denver' else row.get('city')
+    if place and normalize(place) not in normalize(venue):
+        clause.append(f'in {place}')
+    d = _denver(row['starts_at'])
+    when = f'{d.strftime("%A")} at {fmt_time(row["starts_at"])}'
+    sentence = f'{" ".join(clause)}, {when}.'
+    price = _price_phrase(row.get('price', ''))
+    return f'{sentence} {price}' if price else sentence
+
+
+def factual_description(row):
+    """The factual line: the authored `description` when present, else the
+    deterministic template. Always non-empty."""
+    return (row.get('description') or '').strip() or template_description(row)
+
+
+def editorial_note(row):
+    """Daniel's verbatim one-liner, or '' — never synthesized. External rows
+    only (a Firstwater row speaks on its own session page)."""
+    if row.get('kind') == 'external':
+        return (row.get('note') or '').strip()
+    return ''
+
+
+def alt_text(row):
+    """Factual ALT/caption text: '{name} — {operator} at {venue}, {place}'.
+    Degrades cleanly when operator/venue/place are missing (functional locator
+    string, not body copy; the em dash follows the spec's mandated shape)."""
+    name = (row.get('name') or '').strip()
+    op = (row.get('operator') or '').strip()
+    venue = (row.get('venue') or '').strip()
+    place = row.get('neighborhood') if row.get('city') == 'Denver' else row.get('city')
+    place = (place or row.get('city') or '').strip()
+    loc = op
+    # An operator running its own room (operator == venue) shows the name once.
+    if venue and normalize(venue) != normalize(op):
+        loc = f'{loc} at {venue}' if loc else venue
+    if place:
+        loc = f'{loc}, {place}' if loc else place
+    return f'{name} — {loc}' if loc else name
+
+
+# dedup_key is already normalized (lowercase alnum + spaces + '|'); collapse
+# every run of non-alnum to one hyphen for a stable, URL-safe permalink slug.
+_SLUG_STRIP_RE = re.compile(r'[^a-z0-9]+')
+
+
+def event_slug(row):
+    """Stable URL-safe slug from the dedup_key. Deterministic across builds."""
+    return _SLUG_STRIP_RE.sub('-', (row.get('dedup_key') or '').lower()).strip('-')
+
+
+def event_permalink_path(row):
+    """Site-relative permalink path for an external event page (trailing slash)."""
+    return f'calendar/event/{event_slug(row)}/'
+
+
+def event_permalink_url(row, site_url):
+    return f'{site_url}/{event_permalink_path(row)}'
+
+
+def _price_span(rows):
+    """(low_label, high_num) across rows' readable prices, or ('', None).
+    Free counts as 0; unreadable/donation prices are skipped."""
+    lo = hi = None
+    for r in rows:
+        kind = _parse_price(r.get('price', ''))
+        nums = []
+        if kind[0] == 'free':
+            nums = [0.0]
+        elif kind[0] == 'fixed':
+            nums = [kind[1]]
+        elif kind[0] == 'range':
+            nums = [kind[1], kind[2]]
+        for n in nums:
+            lo = n if lo is None else min(lo, n)
+            hi = n if hi is None else max(hi, n)
+    if hi is None:
+        return ('', None)
+    lo_label = 'free' if lo == 0 else f'${_fmt_price_num(lo)}'
+    return (lo_label, hi)
+
+
+def build_summary_sentence(rows, now=None):
+    """Machine-extractable answer-first sentence for the top of /calendar/.
+
+    Counts sessions starting in the next seven days, per city, with a price
+    span. Rebuilt every build so it always matches the live list.
+    """
+    wk = week_rows(rows, now)
+    n = len(wk)
+    if n == 0:
+        return ('No sessions are on the Front Range calendar for the next seven '
+                'days yet; the weeks ahead are listed below.')
+    counts = OrderedDict((c, 0) for c in CITIES)
+    for r in wk:
+        counts[r['city']] = counts.get(r['city'], 0) + 1
+    parts = [f'{cnt} in {c}' for c, cnt in counts.items() if cnt]
+    if len(parts) > 1:
+        breakdown = ', '.join(parts[:-1]) + ', and ' + parts[-1]
+    else:
+        breakdown = parts[0]
+    noun = 'session' if n == 1 else 'sessions'
+    sent = f'This week on the Front Range: {n} sound {noun}, {breakdown}'
+    lo_label, hi = _price_span(wk)
+    if hi is not None:
+        sent += f', priced {lo_label} to ${_fmt_price_num(hi)}'
+    return sent + '.'
+
+
+# Register-passable PLACEHOLDER FAQ (flagged for Daniel). Factual, no praise,
+# no woo — the GEO/AIO citation surface. Answers double as FAQPage JSON-LD.
+CALENDAR_FAQ = (
+    {
+        'q': 'What is a sound bath?',
+        'a': ('A sound bath is a session where you lie down, usually on a mat, '
+              'while a facilitator plays instruments such as gongs, singing '
+              'bowls, and chimes. Most run 45 to 75 minutes, and you stay '
+              'clothed and still the whole time. This calendar also covers close '
+              'relatives like gong baths, breathwork with sound, and guided '
+              'meditations played on live instruments.'),
+    },
+    {
+        'q': 'How much do sound baths cost on the Front Range?',
+        'a': ('Most sessions in Denver, Boulder, Fort Collins, and Colorado '
+              'Springs run between $20 and $55. Some are offered by donation or '
+              'free. Each listing shows its own price, and the ticket link goes '
+              'straight to the operator.'),
+    },
+    {
+        'q': 'What should I bring to a sound bath?',
+        'a': ('Wear clothes you can lie down in. Many rooms provide mats, '
+              'bolsters, and blankets, though your own blanket, a pillow, and '
+              'water are never wrong. When in doubt, the operator’s listing '
+              'says what the room supplies.'),
+    },
+)
+
+
+def render_faq_html():
+    """Always-visible FAQ block (better for AI extraction than a collapsed
+    accordion). The FAQPage JSON-LD is built from the same CALENDAR_FAQ source."""
+    out = ['<section class="cal-faq" id="faq">',
+           '  <h2 class="cal-area__h2">Common questions</h2>']
+    for item in CALENDAR_FAQ:
+        out.append('  <div class="cal-faq__item">')
+        out.append(f'    <h3 class="cal-faq__q">{_esc(item["q"])}</h3>')
+        out.append(f'    <p class="cal-faq__a">{_esc(item["a"])}</p>')
+        out.append('  </div>')
+    out.append('</section>')
+    return '\n'.join(out)
+
+
 # ---------------------------------------------------------------------------
 # HTML rendering (light ground; reuses design tokens via calendar/style.css)
 # ---------------------------------------------------------------------------
@@ -504,8 +766,20 @@ def _place_label(row, in_strip):
     return row['city']
 
 
+def _facil_venue_link(row):
+    """The 'their own page' link beside the ticket link: the operator's own site
+    when known, else the venue's. URLs are already scheme-scrubbed at row build.
+    Returns (url, label) or (None, None)."""
+    if row.get('operator_url'):
+        return row['operator_url'], (row.get('operator') or 'Operator')
+    if row.get('venue_url'):
+        return row['venue_url'], (row.get('venue') or 'Venue')
+    return None, None
+
+
 def _render_row(row, in_strip=False, nav_prefix=''):
-    cls = 'cal-row cal-row--firstwater' if row['kind'] == 'firstwater' else 'cal-row'
+    is_fw = row['kind'] == 'firstwater'
+    cls = 'cal-row cal-row--firstwater' if is_fw else 'cal-row'
     parts = [f'<article class="{cls}">']
     parts.append('  <div class="cal-row__when">')
     parts.append(f'    <span class="cal-row__date">{_esc(fmt_row_date(row["starts_at"]))}</span>')
@@ -513,17 +787,49 @@ def _render_row(row, in_strip=False, nav_prefix=''):
     parts.append('  </div>')
     parts.append('  <div class="cal-row__body">')
 
-    if row['kind'] == 'firstwater':
-        parts.append('    <span class="cal-row__tag">Firstwater</span>')
-    parts.append(f'    <h3 class="cal-row__name">{_esc(row["name"])}</h3>')
+    # Event image — one consistent frame (fixed ratio, object-fit cover, lazy)
+    # so heterogeneous operator flyers sit coherently. The frame is Firstwater's,
+    # the content is the operator's (RA-style). External rows only, and only when
+    # the listing carried a scheme-safe image; no image -> no frame (clean row).
+    img = row.get('image_url')
+    if img and not is_fw:
+        parts.append('    <div class="cal-row__media">')
+        parts.append(
+            f'      <img src="{_esc(img)}" alt="{_esc(alt_text(row))}" '
+            f'loading="lazy" decoding="async">'
+        )
+        parts.append('    </div>')
+
+    parts.append('    <div class="cal-row__text">')
+
+    # Firstwater's own rows: distinct treatment + a subtle "our room" marker.
+    if is_fw:
+        parts.append('      <span class="cal-row__tag">Firstwater</span>')
+        parts.append('      <span class="cal-row__ours">Our room</span>')
+
+    # Name links to the event's page: external -> its calendar permalink (our
+    # rich, indexable surface + the internal link that puts it in the crawl
+    # graph); Firstwater -> its own session page.
+    slug = event_slug(row)
+    if is_fw:
+        name_href = f'{nav_prefix}{row["ticket_url"]}'
+    else:
+        name_href = f'{nav_prefix}{event_permalink_path(row)}' if slug else ''
+    if name_href:
+        parts.append(
+            f'      <h3 class="cal-row__name">'
+            f'<a href="{_esc(name_href)}">{_esc(row["name"])}</a></h3>'
+        )
+    else:
+        parts.append(f'      <h3 class="cal-row__name">{_esc(row["name"])}</h3>')
 
     # Facts line: operator · venue + neighborhood/city · price. Firstwater rows
     # carry the tag instead of the operator name. When an operator runs its own
     # room (operator == venue) the name is shown once, not doubled.
     meta = []
-    if row['kind'] == 'external' and row['operator']:
+    if not is_fw and row['operator']:
         meta.append(row['operator'])
-    if row['venue'] and normalize(row['venue']) != normalize(row['operator'] if row['kind'] == 'external' else ''):
+    if row['venue'] and normalize(row['venue']) != normalize(row['operator'] if not is_fw else ''):
         meta.append(row['venue'])
     place = _place_label(row, in_strip)
     if place:
@@ -531,28 +837,43 @@ def _render_row(row, in_strip=False, nav_prefix=''):
     if row['price']:
         meta.append(row['price'])
     if meta:
-        parts.append(f'    <p class="cal-row__meta">{_esc(" · ".join(meta))}</p>')
+        parts.append(f'      <p class="cal-row__meta">{_esc(" · ".join(meta))}</p>')
+
+    # Factual line (authored description, else deterministic template) — always
+    # present, so no row is thin; states what the event IS, never whether it's good.
+    parts.append(f'      <p class="cal-row__desc">{_esc(factual_description(row))}</p>')
 
     # Daniel's one-line editorial note — the moat. External rows only, and only
-    # when he has written one; bare rows are the honest default.
-    if row['kind'] == 'external' and row['note']:
-        parts.append(f'    <p class="cal-row__note">{_esc(row["note"])}</p>')
+    # when he has written one; a bare row (factual line only) is the honest default.
+    note = editorial_note(row)
+    if note:
+        parts.append(f'      <p class="cal-row__note">{_esc(note)}</p>')
 
-    # Ticket link. External -> their link, new tab. Firstwater -> its session page.
-    # Firstwater rows carry an internal, trusted relative path (nav_prefix + slug);
-    # external rows carry a scraped URL, so it is scheme-checked before it becomes
-    # an href — an unsafe URL simply yields no link (the fact row still stands).
-    if row['kind'] == 'firstwater':
-        href = f'{nav_prefix}{row["ticket_url"]}'
-        parts.append(f'    <p class="cal-row__cta"><a href="{_esc(href)}">Get tickets</a></p>')
+    # CTA row: ticket link (external -> their link, new tab; Firstwater -> its
+    # session page) plus the operator/venue 'own page' link when known. External
+    # ticket/site URLs are scheme-checked before becoming hrefs; unsafe -> no link.
+    cta = []
+    if is_fw:
+        cta.append(
+            f'<a href="{_esc(nav_prefix + row["ticket_url"])}">Get tickets</a>'
+        )
     else:
         safe = _safe_ext_url(row['ticket_url'])
         if safe:
-            parts.append(
-                f'    <p class="cal-row__cta"><a href="{_esc(safe)}" '
-                f'target="_blank" rel="noopener">Tickets</a></p>'
+            cta.append(
+                f'<a href="{_esc(safe)}" target="_blank" rel="noopener">Tickets</a>'
             )
-    parts.append('  </div>')
+        link_url, link_label = _facil_venue_link(row)
+        if link_url:
+            cta.append(
+                f'<a class="cal-row__link" href="{_esc(link_url)}" '
+                f'target="_blank" rel="noopener">{_esc(link_label)}</a>'
+            )
+    if cta:
+        parts.append('      <p class="cal-row__cta">' + ' '.join(cta) + '</p>')
+
+    parts.append('    </div>')  # .cal-row__text
+    parts.append('  </div>')    # .cal-row__body
     parts.append('</article>')
     return '\n'.join(parts)
 
@@ -596,6 +917,9 @@ def render_calendar_body(rows, nav_prefix='', now=None):
         ))
         out.append('</div>')
 
+    # FAQ — a GEO/AIO citation surface (FAQPage JSON-LD emitted by build.py).
+    out.append(render_faq_html())
+
     return '\n'.join(out)
 
 
@@ -632,13 +956,15 @@ def _fmt_price_num(n):
 
 def _external_offer(row):
     """Offer/AggregateOffer for an external row, or None. Ticket url only when
-    known; price only when it can be read accurately from the price string."""
+    known; price only when it can be read accurately from the price string.
+    Free events carry isAccessibleForFree:true (spec §6)."""
     kind = _parse_price(row['price'])
     url = _safe_ext_url(row['ticket_url']) or None
     if kind[0] == 'fixed':
         offer = {'@type': 'Offer', 'price': _fmt_price_num(kind[1]), 'priceCurrency': 'USD'}
     elif kind[0] == 'free':
-        offer = {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD'}
+        offer = {'@type': 'Offer', 'price': '0', 'priceCurrency': 'USD',
+                 'isAccessibleForFree': True}
     elif kind[0] == 'range':
         offer = {'@type': 'AggregateOffer',
                  'lowPrice': _fmt_price_num(kind[1]),
@@ -653,8 +979,14 @@ def _external_offer(row):
     return offer
 
 
-def _external_event(row):
-    """schema.org Event for one external row: only fields we actually know."""
+def _external_event(row, site_url):
+    """schema.org Event (no @context) for one external row: only fields we know.
+
+    url = the event's PERMALINK (its /calendar/event/<slug>/ page); offers.url
+    stays the operator's ticket link. description = Daniel's note if present,
+    else the factual description/template (accurate, never padded). performer =
+    the named facilitator; organizer = the operator; image = the listing image.
+    """
     place = {'@type': 'Place'}
     if row['venue']:
         place['name'] = row['venue']
@@ -672,22 +1004,40 @@ def _external_event(row):
         'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
         'location': place,
     }
+    desc = editorial_note(row) or factual_description(row)
+    if desc:
+        ev['description'] = desc
+    if row.get('facilitator'):
+        ev['performer'] = {'@type': 'Person', 'name': row['facilitator']}
     if row['operator']:
         ev['organizer'] = {'@type': 'Organization', 'name': row['operator']}
+        if row.get('operator_url'):
+            ev['organizer']['url'] = row['operator_url']
+    if row.get('image_url'):
+        ev['image'] = {'@type': 'ImageObject', 'url': row['image_url'],
+                       'caption': alt_text(row)}
     offer = _external_offer(row)
     if offer:
         ev['offers'] = offer
-    _safe_url = _safe_ext_url(row['ticket_url'])
-    if _safe_url:
-        ev['url'] = _safe_url
+    slug = event_slug(row)
+    if slug:
+        ev['url'] = event_permalink_url(row, site_url)
     return ev
 
 
-def _firstwater_event(row, page_url, site_url):
+def event_jsonld(row, site_url):
+    """Standalone Event (with @context) for an external event's permalink page."""
+    return {'@context': 'https://schema.org', **_external_event(row, site_url)}
+
+
+def _firstwater_event(row, site_url):
     """Reuse sessions_feed's Event builder so Firstwater rows carry the same
-    accurate Event markup as their session pages; strip @context for nesting."""
+    accurate Event markup as their session pages; url points at the session page
+    (its canonical home), and @context is stripped for ItemList nesting."""
+    slug = (row.get('_sess') or {}).get('event_slug', '')
+    session_url = f'{site_url}/sessions/{slug}/' if slug else site_url
     ev = sessions_feed.event_schema(
-        row['_sess'], row['_event_title'], page_url, site_url,
+        row['_sess'], row['_event_title'], session_url, site_url,
     )
     ev.pop('@context', None)
     return ev
@@ -708,8 +1058,8 @@ def calendar_itemlist(rows, page_url, site_url):
 
     items = []
     for i, row in enumerate(ordered, start=1):
-        ev = (_firstwater_event(row, page_url, site_url)
-              if row['kind'] == 'firstwater' else _external_event(row))
+        ev = (_firstwater_event(row, site_url)
+              if row['kind'] == 'firstwater' else _external_event(row, site_url))
         items.append({'@type': 'ListItem', 'position': i, 'item': ev})
 
     return {
@@ -718,3 +1068,180 @@ def calendar_itemlist(rows, page_url, site_url):
         'name': 'Front Range sound baths this week',
         'itemListElement': items,
     }
+
+
+def collectionpage_schema(page_url, site_url, description, date_modified):
+    """CollectionPage schema for /calendar/ with a speakable summary selector.
+    dateModified matches the visible 'Last updated' stamp."""
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        'name': 'Sound baths on the Front Range — this week',
+        'url': page_url,
+        'description': description,
+        'dateModified': date_modified,
+        'isPartOf': {'@type': 'WebSite', 'name': 'Firstwater', 'url': site_url},
+        'speakable': {'@type': 'SpeakableSpecification',
+                      'cssSelector': ['#cal-summary']},
+    }
+
+
+def faqpage_schema():
+    """FAQPage schema built from the same CALENDAR_FAQ the page renders."""
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+            {'@type': 'Question', 'name': item['q'],
+             'acceptedAnswer': {'@type': 'Answer', 'text': item['a']}}
+            for item in CALENDAR_FAQ
+        ],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Per-event permalink page (/calendar/event/<slug>/) — the body HTML. Page
+# assembly (base layout, <head>, schema) is build.py's job; this returns the
+# <main> content only, consonant with the section-file pipeline.
+# ---------------------------------------------------------------------------
+
+# Inline style for event pages (they have no _src/pages dir, so no style.css is
+# injected). Design tokens come from the sitewide styles.css every page loads.
+EVENT_PAGE_STYLE = """<style>
+    .cal-event { }
+    .cal-event__crumbs { font-size: 0.82rem; color: rgba(10,11,13,0.55); margin: 0 0 2rem; }
+    .cal-event__crumbs a { color: var(--accent-on-light); text-decoration: none; }
+    .cal-event__crumbs a:hover { text-decoration: underline; }
+    .cal-past-banner { background: rgba(10,11,13,0.05); border-left: 3px solid var(--gray); padding: 0.9rem 1.2rem; margin: 0 0 2rem; font-size: 0.95rem; }
+    .cal-past-banner a { color: var(--accent-on-light); }
+    .cal-event__h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0.4rem 0 1.4rem; }
+    .cal-event__desc { font-size: 1.15rem; line-height: 1.6; max-width: 42rem; color: rgba(10,11,13,0.78); margin: 0 0 1rem; }
+    .cal-event__note { font: 500 1.2rem var(--font-display); color: var(--ink); max-width: 40rem; line-height: 1.4; margin: 0 0 1.6rem; }
+    .cal-event__figure { margin: 2rem 0; max-width: 640px; }
+    .cal-event__figure img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; background: rgba(10,11,13,0.06); }
+    .cal-event__figure figcaption { font-size: 0.82rem; color: rgba(10,11,13,0.55); margin-top: 0.6rem; }
+    .cal-event__facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.6rem 1.6rem; margin: 2rem 0; max-width: 40rem; }
+    .cal-event__facts dt { font: 600 0.72rem var(--font-body); letter-spacing: 0.13em; text-transform: uppercase; color: var(--gray); align-self: baseline; }
+    .cal-event__facts dd { margin: 0; color: var(--ink); }
+    .cal-event__cta { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: center; margin: 2rem 0; }
+    .cal-event__link { color: var(--accent-on-light); font: 600 0.9rem var(--font-body); text-decoration: none; }
+    .cal-event__link:hover { text-decoration: underline; }
+    .cal-event__back { margin: 2.4rem 0 0; padding-top: 2rem; border-top: 1px solid rgba(10,11,13,0.14); }
+    .cal-event__back a { color: var(--accent-on-light); text-decoration: none; }
+    .cal-event__back a:hover { text-decoration: underline; }
+    @media (max-width: 640px) { .cal-event__facts { grid-template-columns: 1fr; gap: 0.2rem; } .cal-event__facts dd { margin-bottom: 0.8rem; } }
+  </style>"""
+
+
+def render_event_page(row, nav_prefix, site_url, now=None):
+    """The <main> content for one external event's permalink page."""
+    now = _now_utc(now)
+    is_past = parse_iso(row['starts_at']) <= now
+    esc = _esc
+    out = ['<section class="section section--light cal-event">', '  <div class="container">']
+
+    # Breadcrumb (visible) — mirrors the BreadcrumbList schema build.py emits.
+    out.append('    <nav class="cal-event__crumbs" aria-label="Breadcrumb">')
+    out.append(
+        f'      <a href="{nav_prefix}">Home</a> <span aria-hidden="true">/</span> '
+        f'<a href="{nav_prefix}calendar/">Calendar</a> <span aria-hidden="true">/</span> '
+        f'<span>{esc(row["name"])}</span>')
+    out.append('    </nav>')
+
+    # Past session: page stays live (build.py sets robots=noindex + drops it from
+    # the sitemap) but says so and points at the current list.
+    if is_past:
+        out.append(
+            '    <p class="cal-past-banner">This session has passed. '
+            f'<a href="{nav_prefix}calendar/">See what’s on now →</a></p>')
+
+    out.append('    <span class="eyebrow">Front Range calendar</span>')
+    out.append(f'    <h1 class="cal-event__h1">{esc(row["name"])}</h1>')
+
+    out.append(f'    <p class="cal-event__desc">{esc(factual_description(row))}</p>')
+    note = editorial_note(row)
+    if note:
+        out.append(f'    <p class="cal-event__note">{esc(note)}</p>')
+
+    img = row.get('image_url')
+    if img:
+        out.append('    <figure class="cal-event__figure">')
+        out.append(
+            f'      <img src="{esc(img)}" alt="{esc(alt_text(row))}" '
+            f'loading="lazy" decoding="async">')
+        out.append(f'      <figcaption>{esc(alt_text(row))}</figcaption>')
+        out.append('    </figure>')
+
+    # Facts block
+    out.append('    <dl class="cal-event__facts">')
+    out.append(
+        f'      <dt>When</dt><dd>{esc(sessions_feed.fmt_date_long(row["starts_at"]))} '
+        f'· {esc(fmt_time(row["starts_at"]))} (Denver time)</dd>')
+    venue_bits = ' · '.join(x for x in (row.get('venue'), row.get('address')) if x)
+    if venue_bits:
+        out.append(f'      <dt>Where</dt><dd>{esc(venue_bits)}</dd>')
+    place = row['neighborhood'] if row['city'] == 'Denver' and row.get('neighborhood') else None
+    area = f'{place}, {row["city"]}' if place else row['city']
+    out.append(f'      <dt>Area</dt><dd>{esc(area)}</dd>')
+    if row.get('price'):
+        out.append(f'      <dt>Price</dt><dd>{esc(row["price"])}</dd>')
+    if row.get('facilitator'):
+        out.append(f'      <dt>Facilitator</dt><dd>{esc(row["facilitator"])}</dd>')
+    if row.get('operator'):
+        out.append(f'      <dt>Operator</dt><dd>{esc(row["operator"])}</dd>')
+    out.append('    </dl>')
+
+    # Links: operator tickets + operator/venue own page + a maps link.
+    links = []
+    safe = _safe_ext_url(row['ticket_url'])
+    if safe:
+        links.append(
+            f'<a class="btn btn-primary" href="{esc(safe)}" target="_blank" '
+            f'rel="noopener">Tickets</a>')
+    link_url, link_label = _facil_venue_link(row)
+    if link_url:
+        links.append(
+            f'<a class="cal-event__link" href="{esc(link_url)}" target="_blank" '
+            f'rel="noopener">{esc(link_label)}</a>')
+    if row.get('address'):
+        q = quote_plus(f'{row["address"]}, {row["city"]}, CO')
+        maps = f'https://www.google.com/maps/search/?api=1&query={q}'
+        links.append(
+            f'<a class="cal-event__link" href="{esc(maps)}" target="_blank" '
+            f'rel="noopener">Open in Maps</a>')
+    if links:
+        out.append('    <p class="cal-event__cta">' + ' '.join(links) + '</p>')
+
+    anchor = CITY_ANCHOR.get(row['city'], '')
+    out.append(
+        f'    <p class="cal-event__back"><a href="{nav_prefix}calendar/#{anchor}">'
+        'Part of the Front Range calendar →</a></p>')
+
+    out.append('  </div>')
+    out.append('</section>')
+    return '\n'.join(out)
+
+
+def approved_event_rows(cal_feed, now=None):
+    """External rows for EVERY approved event — past and future — deduped by
+    permalink slug. Drives the permalink-page pipeline (future pages are
+    indexed + in the sitemap; past pages stay live but noindex + out of it).
+    Firstwater sessions are excluded: they already have their own rich session
+    pages and must not get a second, duplicate permalink.
+    """
+    rows, seen = [], set()
+    for e in (cal_feed or {}).get('events', []):
+        if e.get('status') != RENDER_STATUS:
+            continue
+        try:
+            parse_iso(e['starts_at'])
+        except (KeyError, ValueError):
+            continue
+        row = _external_row(e)
+        slug = event_slug(row)
+        if not slug or slug in seen:
+            continue
+        seen.add(slug)
+        rows.append(row)
+    rows.sort(key=lambda r: parse_iso(r['starts_at']))
+    return rows
