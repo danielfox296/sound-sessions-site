@@ -96,10 +96,20 @@ RENDER_STATUS = 'approved'
 
 def normalize(s):
     """lowercase, strip accents/diacritics, drop non-alphanumeric-non-space
-    chars, collapse whitespace to single spaces, trim."""
+    chars, collapse whitespace to single spaces, trim.
+
+    Whitespace is collapsed to a single space BEFORE the non-alnum strip so that
+    a scrape artifact — a tab/newline/exotic-space wedged between two words —
+    becomes a separator, not a glue: "Full Moon\nSound" -> "full moon sound",
+    never "full moonsound". This keeps the dedup_key byte-identical to the
+    authoritative service impl (TS `[^a-z0-9\\s]`), which is the whole point of
+    the shared key. (Python `\\s` matches the whitespace a real listing produces;
+    a zero-width U+FEFF between words is the one theoretical residual and does not
+    occur in listing data.)"""
     s = unicodedata.normalize('NFKD', s or '')
     s = ''.join(ch for ch in s if not unicodedata.combining(ch))
     s = s.lower()
+    s = re.sub(r'\s+', ' ', s)
     s = re.sub(r'[^a-z0-9 ]', '', s)
     s = re.sub(r'\s+', ' ', s).strip()
     return s
