@@ -64,6 +64,16 @@ SITE_DESCRIPTION = (
     'built around something worth putting down.'
 )
 
+# Public profile URLs (GBP, Eventbrite, Meetup, Insight Timer, socials) for
+# schema.org sameAs on the LocalBusiness and publisher entities — the
+# cross-source entity stitching the site-plan calls for. Add each URL to
+# data/profiles.json as the account goes live; an empty list emits no key.
+try:
+    with open(os.path.join('data', 'profiles.json'), encoding='utf-8') as _f:
+        SAME_AS = [u for u in json.load(_f).get('sameAs', []) if u]
+except (FileNotFoundError, json.JSONDecodeError):
+    SAME_AS = []
+
 
 def page_url(output):
     """Public directory-style URL for a built output path.
@@ -713,6 +723,8 @@ def build():
                     "rest and nervous system down-regulation"
                 ]
             }
+            if SAME_AS:
+                schema["sameAs"] = SAME_AS
 
         schema_json = f'<script type="application/ld+json">\n{json.dumps(schema, indent=2)}\n  </script>'
 
@@ -766,6 +778,8 @@ def build():
                     "name": "Firstwater"
                 }
             }
+            if SAME_AS:
+                website_schema["publisher"]["sameAs"] = SAME_AS
             schema_json += f'\n  <script type="application/ld+json">\n{json.dumps(website_schema, indent=2)}\n  </script>'
 
         # FAQPage schema — manual `faq` in config.json wins; otherwise
