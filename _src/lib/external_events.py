@@ -2,8 +2,9 @@
 
 The Front Range calendar (/calendar/) lists sound events run by other
 operators alongside Firstwater's own dated sessions. At build time we:
-  1. fetch the calendar feed (env CALENDAR_FEED_URL, default: the events
-     service /feeds/calendar.json, which serves APPROVED events only),
+  1. fetch the calendar feed (env CALENDAR_FEED_URL, default: the Sound Bath
+     Calendar admin service /feeds/calendar.json, which serves APPROVED
+     events only),
   2. validate its shape and write it to data/external-events.json
      (committed, deterministic formatting) so every future build has a
      known-good copy,
@@ -11,14 +12,13 @@ operators alongside Firstwater's own dated sessions. At build time we:
      committed data/external-events.json, then to an empty feed. A broken
      feed never breaks the build.
 
-INTERIM (Week 1) note: /feeds/calendar.json does not exist yet. Until the
-service ships it, the fetch fails on every build and we fall back to the
-committed data/external-events.json — which the pull agent writes as a PR
-and Daniel reviews. That committed file is BOTH the interim source of truth
-AND the eventual cache: once the service serves the feed, a successful HTTP
-fetch overwrites it (same discipline as sessions_feed + data/sessions-cache.json).
-Set CALENDAR_FEED_FILE=/abs/path to build against a local fixture without
-ever touching the committed file.
+The live feed is served by the admin service (DEFAULT_FEED_URL). A successful
+HTTP fetch overwrites the committed data/external-events.json, which is the
+cache/fallback for a build where the service is unreachable (same discipline
+as sessions_feed + data/sessions-cache.json). Approvals in the admin curation
+queue therefore reach the public site on the next build. Set
+CALENDAR_FEED_FILE=/abs/path to build against a local fixture without ever
+touching the committed file.
 
 Stdlib only — no new dependencies. Date/time formatting and the Firstwater
 Event builder are reused from sessions_feed so the two feeds never drift.
@@ -63,7 +63,7 @@ from urllib.parse import quote_plus
 from _src.lib import sessions_feed
 from _src.lib.sessions_feed import DENVER, parse_iso
 
-DEFAULT_FEED_URL = 'https://events.thefirstwater.co/feeds/calendar.json'
+DEFAULT_FEED_URL = 'https://admin.soundbathcalendar.com/feeds/calendar.json'
 CACHE_REL_PATH = os.path.join('data', 'external-events.json')
 FETCH_TIMEOUT_S = 10
 
