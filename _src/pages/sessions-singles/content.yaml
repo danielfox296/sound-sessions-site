@@ -10,20 +10,20 @@ last_updated: "2026-07-16"
 author:
   name: "Firstwater"
   role: "Denver"
-meta_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm room than a loud one."
-llms_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm room than a loud one."
+meta_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm space than a loud one."
+llms_description: "A social night in Denver with sound at the center, for single people who would rather meet someone in a calm space than a loud one."
 tags: [sessions, denver, social]
 sections:
   - type: prose
     body: |
       A social night with sound at the center, for single people who would
-      rather meet someone in a calm room than a loud one. It runs on its own,
+      rather meet someone in a calm space than a loud one. It runs on its own,
       separate from every other session, and it is labeled exactly what it is.
 
   - type: prose
     body: |
       First date being set. You leave having actually met the people you were in
-      the room with. [Write to us](../../contact/) and check the box to hear when
+      the session with. [Write to us](../../contact/) and check the box to hear when
       tickets go up.
 
       [All sessions](../../sessions/)
