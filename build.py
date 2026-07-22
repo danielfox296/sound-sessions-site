@@ -1077,16 +1077,20 @@ def build():
 
     # Build RSS XML
     # Channel description reuses the blog index meta description verbatim
-    # (_src/pages/blog-index/config.json) — no new copy.
+    # (_src/pages/blog-index/config.json) — no new copy, interpolated so the
+    # two can never drift again.
+    _blog_index_cfg = json.loads(read(os.path.join(SRC, 'pages', 'blog-index', 'config.json')))
+    _channel_desc = (_blog_index_cfg.get('meta_description', '')
+                     .replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;'))
     rss_xml = '''<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>Firstwater Blog</title>
   <link>{site_url}/blog/</link>
-  <description>Writing on sound, rooms, and what people put down in them. From the producer behind Denver sound sessions.</description>
+  <description>{channel_desc}</description>
   <language>en-us</language>
   <atom:link href="{site_url}/rss.xml" rel="self" type="application/rss+xml"/>
-'''.format(site_url=SITE_URL)
+'''.format(site_url=SITE_URL, channel_desc=_channel_desc)
 
     for item in rss_items[:20]:  # Last 20 posts
         # Escape XML special chars in description
