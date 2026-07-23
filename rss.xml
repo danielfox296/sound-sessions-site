@@ -3,9 +3,16 @@
 <channel>
   <title>Firstwater Blog</title>
   <link>https://thefirstwater.co/blog/</link>
-  <description>Writing on sound, sessions, and what people put down in them. From the producer behind Denver sound sessions.</description>
+  <description>Writing on sound, sessions, and what people put down in them. From Daniel, also known as Firstwater.</description>
   <language>en-us</language>
   <atom:link href="https://thefirstwater.co/rss.xml" rel="self" type="application/rss+xml"/>
+  <item>
+    <title>I'm not a skeptic, and I'm not a believer</title>
+    <link>https://thefirstwater.co/blog/does-sound-healing-work.html</link>
+    <description>A Denver music producer on whether sound healing works: which claims are false, what the real science says, and why the hour can still be worth having.</description>
+    <pubDate>Wed, 22 Jul 2026 00:00:00 +0000</pubDate>
+    <guid>https://thefirstwater.co/blog/does-sound-healing-work.html</guid>
+  </item>
   <item>
     <title>Isolated together</title>
     <link>https://thefirstwater.co/blog/isolated-together.html</link>
