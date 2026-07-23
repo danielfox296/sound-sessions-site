@@ -34,6 +34,7 @@ Notes:
 
 import os
 import posixpath
+import subprocess
 import sys
 import json
 import glob
@@ -1190,9 +1191,42 @@ def _sitemap_url_entry(loc, lastmod):
     return '\n'.join(lines) + '\n'
 
 
+def _git_lastmod(*paths):
+    """YYYY-MM-DD of the newest commit touching any of `paths` (committer
+    date — %cI sliced to the date; %cs would be neater but needs git >= 2.25,
+    and an unknown token comes back LITERALLY, which would land '%cs' in the
+    sitemap). None when git can't answer — no git binary, not a repo, or the
+    paths have no history yet (a fresh page dir before its first commit). CI
+    checks out with fetch-depth: 0 (deploy.yml) so every committed source
+    carries its real history there; a shallow checkout would date everything
+    at the deploy commit — the exact every-URL-restamped defect this exists
+    to fix (audit FW-CODE-1)."""
+    existing = [p for p in paths if p and os.path.exists(p)]
+    if not existing:
+        return None
+    try:
+        proc = subprocess.run(
+            ['git', '-C', REPO, 'log', '-1', '--format=%cI', '--', *existing],
+            capture_output=True, text=True, timeout=15)
+    except Exception:
+        return None
+    if proc.returncode != 0:
+        return None
+    date = proc.stdout.strip()[:10]
+    # Belt and braces: only a real date may reach the sitemap.
+    return date if re.fullmatch(r'\d{4}-\d{2}-\d{2}', date) else None
+
+
 def _page_lastmod(page_path):
-    """YYYY-MM-DD from the newest source file in a page dir (config.json,
-    content.yaml, sections/*.html). Falls back to today if none stat-able."""
+    """YYYY-MM-DD a page's content last changed: git history of the page dir
+    (config.json, content.yaml, sections/ — the sources that feed the page)
+    first, then newest source mtime for local not-yet-committed pages, then
+    today. Git first because CI builds from a fresh checkout where every
+    file's mtime is the checkout time — mtime there stamped every URL with
+    the deploy date (audit FW-CODE-1)."""
+    from_git = _git_lastmod(page_path)
+    if from_git:
+        return from_git
     import datetime
     candidates = [os.path.join(page_path, 'config.json'),
                   os.path.join(page_path, 'content.yaml')]
@@ -1207,7 +1241,8 @@ def generate_sitemap(page_dirs, extra_urls=None):
     """Generate sitemap.xml from page configs. Each <url> carries only <loc>
     and <lastmod> (changefreq/priority dropped — Google ignores them). lastmod
     comes from config `lastmod`, new-format blog YAML `last_updated`/`date`, or
-    a fallback to the newest source-file mtime in the page dir.
+    a fallback to the page dir's git history (then source mtime for pages not
+    yet committed — see _page_lastmod).
 
     Exclusions: skip pages, redirect stubs, 404.html, any page whose
     effective robots value contains "noindex", and any new-format blog post
@@ -1273,7 +1308,8 @@ def generate_sitemap(page_dirs, extra_urls=None):
             lastmod = config.get('lastmod')
             loc = page_url(output)
 
-        # lastmod is the one field crawlers use; fall back to source mtime.
+        # lastmod is the one field crawlers use; fall back to the page's
+        # git history (mtime only for not-yet-committed pages).
         if not lastmod:
             lastmod = _page_lastmod(page_path)
         xml = _sitemap_url_entry(loc, lastmod)
