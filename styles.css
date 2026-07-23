@@ -102,15 +102,26 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.
 }
 
 /* ---- buttons ---- */
-.btn { display: inline-block; font: 600 0.95rem var(--font-body); text-decoration: none; padding: 0.95rem 2rem; transition: filter .2s, transform .15s; }
+.btn { display: inline-block; font: 600 0.95rem var(--font-body); text-decoration: none; padding: 0.95rem 2rem; transition: filter .2s, box-shadow .2s, transform .15s; }
 .btn:active { transform: translateY(1px); }
 .btn-primary { background: var(--accent); color: var(--ink); }
 .btn-primary:hover { filter: brightness(1.12); }
+/* FW-DES-2, per the calendar's ratified CAL-11: the ice fill is 2.09:1 against
+   paper and reads as a *disabled* button at the exact conversion points (contact
+   submits, FAQ CTA). On light grounds the primary flips to INK fill + PAPER text
+   (18.3:1); ice returns only as the hover accent (inset underline). Dark grounds
+   keep the ice fill. Selector is 0-2-0, so it also beats `.section--light a`
+   (0-1-1) on the FAQ's anchor button — no separate label pin needed. */
+.section--light .btn-primary { background: var(--ink); color: var(--paper); }
+.section--light .btn-primary:hover { filter: none; box-shadow: inset 0 -2px 0 var(--accent); }
 .btn-ghost { border: 1px solid var(--line); color: var(--paper); }
 .btn + .btn { margin-left: 0.8rem; }
 @media (max-width: 480px) { .btn + .btn { margin-left: 0; margin-top: 0.8rem; } }
 .section--light .btn-ghost { color: var(--ink); border-color: rgba(10,11,13,0.25); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* Ice ring on paper is 2.09:1 — under the 3:1 non-text floor. Light grounds take
+   the accessible blue (5.02:1); dark grounds keep ice (8.8:1 on ink). */
+.section--light a:focus-visible, .section--light button:focus-visible { outline-color: var(--accent-on-light); }
 
 /* ---- steps ---- */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-top: 3rem; }
@@ -118,6 +129,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .step .step-k { font: 700 2.6rem var(--font-display); color: var(--accent); display: block; margin-bottom: 0.8rem; }
 .step p { color: var(--gray); font-size: 0.98rem; }
 .section--light .step p { color: rgba(10,11,13,0.65); }
+.section--light .step .step-k { color: var(--accent-on-light); } /* FW-DES-3: ice text fails on paper */
 @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
 
 /* ---- faq ---- */
@@ -126,6 +138,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .section--light .accordion { border-color: rgba(10,11,13,0.14); }
 .accordion-trigger { width: 100%; text-align: left; background: none; border: none; cursor: pointer; font: 600 1.25rem var(--font-display); color: inherit; padding: 1.4rem 0; display: flex; justify-content: space-between; align-items: center; }
 .accordion-trigger::after { content: "+"; font-size: 1.4rem; color: var(--accent); }
+.section--light .accordion-trigger::after { color: var(--accent-on-light); } /* FW-DES-3 */
 .accordion[data-open="true"] .accordion-trigger::after { content: "–"; }
 .accordion-panel { display: none; padding: 0 0 1.4rem; color: var(--gray); max-width: 40rem; }
 .section--light .accordion-panel { color: rgba(10,11,13,0.65); }
@@ -161,6 +174,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .seq-item:nth-child(2) { margin-left: 10%; }
 .seq-item:nth-child(3) { margin-left: 20%; }
 .seq-n { font: 300 4.2rem var(--font-display); line-height: 1; color: var(--accent); }
+.section--light .seq-n { color: var(--accent-on-light); } /* FW-DES-3: 2.09:1 misses even the 3:1 large-text floor */
 .seq-item h3 { font-size: 1.35rem; margin-bottom: 0.7rem; }
 .seq-item p { color: rgba(10,11,13,0.65); font-size: 1rem; max-width: 34rem; }
 @media (max-width: 760px) { .seq-item, .seq-item:nth-child(2), .seq-item:nth-child(3) { margin-left: 0; grid-template-columns: 70px 1fr; gap: 1.2rem; } .seq-n { font-size: 2.6rem; } }
@@ -205,9 +219,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 .form-field { display: block; margin-bottom: 1.6rem; }
 .form-field span { display: block; font: 600 0.75rem var(--font-body); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(10,11,13,0.65); margin-bottom: 0.5rem; }
 .form-field input, .form-field textarea, .form-field select { width: 100%; background: transparent; border: 1px solid rgba(10,11,13,0.25); padding: 0.85rem 1rem; font: 400 1rem var(--font-body); color: var(--ink); }
-.form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+/* The form is ink-on-paper by construction (light ground): focus ring and
+   checkbox accent take the accessible blue, not ice (2.09:1 on paper). */
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline: 2px solid var(--accent-on-light); outline-offset: 1px; border-color: transparent; }
 .form-check { display: flex; align-items: center; gap: 0.7rem; margin: 0 0 2rem; font-size: 0.95rem; color: rgba(10,11,13,0.75); }
-.form-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.form-check input { width: 18px; height: 18px; accent-color: var(--accent-on-light); }
 
 /* ---- hear-first capture (contact) ---- */
 #hear-first { scroll-margin-top: 90px; }
